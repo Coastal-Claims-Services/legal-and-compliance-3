@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { ThemeProvider } from '../components/theme-provider';
 import { ThemeToggle } from '../components/theme-toggle';
@@ -16,6 +14,7 @@ import { Link } from 'react-router-dom';
 import { EnhancedStateRuleManager } from '../components/EnhancedStateRuleManager';
 import { StateRule, ResponseTemplate, ComplianceAlert } from '../types/admin';
 import { KENTUCKY_RULES } from '../data/kentuckyRules';
+import { AlertSourceModal } from '../components/AlertSourceModal';
 
 const US_STATES = [
   'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware',
@@ -104,6 +103,8 @@ const Admin = () => {
     template: '',
     variables: ''
   });
+  const [selectedAlert, setSelectedAlert] = useState<ComplianceAlert | null>(null);
+  const [isSourceModalOpen, setIsSourceModalOpen] = useState(false);
 
   const addStateRule = (rule: StateRule) => {
     setStateRules([...stateRules, rule]);
@@ -139,6 +140,16 @@ const Admin = () => {
         alert.id === id ? { ...alert, resolved: true } : alert
       )
     );
+  };
+
+  const openSourceModal = (alert: ComplianceAlert) => {
+    setSelectedAlert(alert);
+    setIsSourceModalOpen(true);
+  };
+
+  const closeSourceModal = () => {
+    setSelectedAlert(null);
+    setIsSourceModalOpen(false);
   };
 
   const unresolvedAlerts = complianceAlerts.filter(alert => !alert.resolved);
@@ -196,7 +207,9 @@ const Admin = () => {
                         <Badge variant={alert.priority === 'High' ? 'destructive' : 'secondary'}>
                           {alert.priority}
                         </Badge>
-                        <span className="font-medium text-sm">{alert.state}</span>
+                        <Badge variant="outline" className="text-xs">
+                          {alert.state}
+                        </Badge>
                         <span className="text-sm">{alert.message}</span>
                         {alert.rule_id && (
                           <Badge variant="outline" className="text-xs">
@@ -204,9 +217,19 @@ const Admin = () => {
                           </Badge>
                         )}
                       </div>
-                      <Button size="sm" variant="outline" onClick={() => resolveAlert(alert.id)}>
-                        Resolve
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => openSourceModal(alert)}
+                          className="text-xs"
+                        >
+                          View Sources
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => resolveAlert(alert.id)}>
+                          Resolve
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -423,9 +446,14 @@ const Admin = () => {
           </Tabs>
         </div>
       </div>
+
+      <AlertSourceModal
+        alert={selectedAlert}
+        isOpen={isSourceModalOpen}
+        onClose={closeSourceModal}
+      />
     </ThemeProvider>
   );
 };
 
 export default Admin;
-

@@ -36,6 +36,17 @@ export interface ComplianceAlert {
   date: string;
   resolved: boolean;
   rule_id?: string;
+  sources?: AlertSource[];
+}
+
+export interface AlertSource {
+  title: string;
+  url?: string;
+  authority?: string;
+  effective?: string;
+  expires?: string;
+  description?: string;
+  lastChecked?: string;
 }
 
 export interface RuleTest {
