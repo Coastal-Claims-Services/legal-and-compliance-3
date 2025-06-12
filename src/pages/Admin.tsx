@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { ThemeProvider } from '../components/theme-provider';
 import { ThemeToggle } from '../components/theme-toggle';
@@ -180,9 +181,9 @@ const Admin = () => {
           </div>
 
           {unresolvedAlerts.length > 0 && (
-            <Card className="mb-6 border-red-200 bg-red-50">
+            <Card className="mb-6 border-destructive/50 bg-destructive/5 dark:bg-destructive/10">
               <CardHeader>
-                <CardTitle className="text-red-800 flex items-center gap-2">
+                <CardTitle className="text-destructive flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5" />
                   Compliance Alerts
                 </CardTitle>
@@ -190,7 +191,7 @@ const Admin = () => {
               <CardContent>
                 <div className="space-y-3">
                   {unresolvedAlerts.slice(0, 3).map((alert) => (
-                    <div key={alert.id} className="flex items-center justify-between p-4 bg-white rounded-lg border border-red-100">
+                    <div key={alert.id} className="flex items-center justify-between p-4 bg-background rounded-lg border border-destructive/20">
                       <div className="flex items-center gap-3 flex-1">
                         <Badge variant={alert.priority === 'High' ? 'destructive' : 'secondary'}>
                           {alert.priority}
@@ -427,3 +428,4 @@ const Admin = () => {
 };
 
 export default Admin;
+
