@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ThemeProvider } from '../components/theme-provider';
 import { ThemeToggle } from '../components/theme-toggle';
@@ -9,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Settings, Database, FileText, Plus, Edit, Trash, ArrowLeft, AlertTriangle, Clock } from 'lucide-react';
+import { Settings, Database, FileText, Plus, Edit, Trash, ArrowLeft, AlertTriangle, Clock, List } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EnhancedStateRuleManager } from '../components/EnhancedStateRuleManager';
 import { StateRule, ResponseTemplate, ComplianceAlert } from '../types/admin';
@@ -183,7 +184,7 @@ const Admin = () => {
               </Link>
               <Link to="/states">
                 <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <list className="h-4 w-4" />
+                  <List className="h-4 w-4" />
                   All States
                 </Button>
               </Link>
