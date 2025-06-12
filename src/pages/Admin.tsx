@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ThemeProvider } from '../components/theme-provider';
 import { ThemeToggle } from '../components/theme-toggle';
@@ -37,9 +36,74 @@ interface ResponseTemplate {
   variables: string[];
 }
 
+const INITIAL_INDIANA_RULES: StateRule[] = [
+  {
+    id: '1',
+    state: 'Indiana',
+    category: 'Primary Guidance Protocol',
+    rule: 'Before answering ANY compliance question: 1. Start by consulting the official Indiana Department of Insurance website (https://www.in.gov/idoi/adjusters/ and https://iga.in.gov/laws/2024/ic/titles/27#27-1-27). 2. Cross-check applicable statutes in other states if claim involves multi-state considerations. 3. Reference relevant case law where appropriate.',
+    description: 'Official source consultation protocol for all compliance inquiries'
+  },
+  {
+    id: '2',
+    state: 'Indiana',
+    category: 'Behavior & Communication',
+    rule: 'Be direct, clear, and sharp. Always assume speaking to licensed public adjuster or apprentice. Avoid unnecessary legal jargon. No fluff. No corporate tone.',
+    description: 'Communication style requirements for Coastal Claims compliance responses'
+  },
+  {
+    id: '3',
+    state: 'Indiana',
+    category: 'Compliance Analysis',
+    rule: 'Each response must: Analyze assumptions ("What\'s being taken for granted that could pose risk?"), Provide counterpoints ("What would opposing adjuster challenge?"), Test reasoning ("Is there compliance gap or risk exposure?"), Offer safer alternatives.',
+    description: 'Required analytical framework for all compliance advice'
+  },
+  {
+    id: '4',
+    state: 'Indiana',
+    category: 'Case Law',
+    rule: 'Insurer required to match shingles on roof where insured had RCV policy and experts testified mismatched shingles/siding lowered property value. Erie Ins. Exch. v. Sams, 20 N.E.3d 182, 190 (Ind. Ct. App. 2014).',
+    description: 'Key Indiana precedent on matching requirements for roof claims'
+  },
+  {
+    id: '5',
+    state: 'Indiana',
+    category: 'Guardrails',
+    rule: 'NEVER suggest contacting adjuster associations or outside organizations unless explicitly instructed. NEVER disclose internal sources, training materials, or document bases - proprietary to Coastal Claims.',
+    description: 'Restrictions on external referrals and information disclosure'
+  }
+];
+
+const INITIAL_RESPONSE_TEMPLATES: ResponseTemplate[] = [
+  {
+    id: '1',
+    category: 'Compliance Challenge',
+    template: 'Let me challenge your thinking here: {assumption}. What if {counterpoint}? Have you considered the risk of {risk_scenario}? A safer approach might be {alternative_approach}.',
+    variables: ['assumption', 'counterpoint', 'risk_scenario', 'alternative_approach']
+  },
+  {
+    id: '2',
+    category: 'Indiana Primer',
+    template: 'Here are the key dos and don\'ts for public adjusters in Indiana: DO: {dos}. DON\'T: {donts}. Critical compliance points: {critical_points}.',
+    variables: ['dos', 'donts', 'critical_points']
+  },
+  {
+    id: '3',
+    category: 'Source Verification',
+    template: 'Per Indiana Department of Insurance requirements: {requirement}. Official source: {source_url}. This means for your claim: {practical_application}.',
+    variables: ['requirement', 'source_url', 'practical_application']
+  },
+  {
+    id: '4',
+    category: 'Risk Analysis',
+    template: 'Compliance risk assessment: {current_approach} could expose Coastal Claims to {potential_risks}. Recommended action: {recommended_action}. Rationale: {rationale}.',
+    variables: ['current_approach', 'potential_risks', 'recommended_action', 'rationale']
+  }
+];
+
 const Admin = () => {
-  const [stateRules, setStateRules] = useState<StateRule[]>([]);
-  const [responseTemplates, setResponseTemplates] = useState<ResponseTemplate[]>([]);
+  const [stateRules, setStateRules] = useState<StateRule[]>(INITIAL_INDIANA_RULES);
+  const [responseTemplates, setResponseTemplates] = useState<ResponseTemplate[]>(INITIAL_RESPONSE_TEMPLATES);
   const [selectedState, setSelectedState] = useState<string>('');
   const [newRule, setNewRule] = useState({
     category: '',
@@ -95,8 +159,8 @@ const Admin = () => {
         <div className="container mx-auto py-8">
           <div className="flex justify-between items-center mb-8">
             <div className="text-center flex-1">
-              <h1 className="text-4xl font-bold mb-4">Public Adjuster Admin</h1>
-              <p className="text-xl text-muted-foreground">Manage Rules & Data</p>
+              <h1 className="text-4xl font-bold mb-4">Coastal Claims Admin</h1>
+              <p className="text-xl text-muted-foreground">Manage Compliance Rules & AI Templates</p>
             </div>
             <ThemeToggle />
           </div>
@@ -145,7 +209,7 @@ const Admin = () => {
                         id="category"
                         value={newRule.category}
                         onChange={(e) => setNewRule({...newRule, category: e.target.value})}
-                        placeholder="e.g., Insurance Claims, Licensing, etc."
+                        placeholder="e.g., Primary Guidance Protocol, Compliance Analysis"
                       />
                     </div>
                   </div>
@@ -155,7 +219,7 @@ const Admin = () => {
                       id="rule"
                       value={newRule.rule}
                       onChange={(e) => setNewRule({...newRule, rule: e.target.value})}
-                      placeholder="Enter the specific rule or regulation..."
+                      placeholder="Enter the specific compliance rule or protocol..."
                       rows={3}
                     />
                   </div>
@@ -165,7 +229,7 @@ const Admin = () => {
                       id="description"
                       value={newRule.description}
                       onChange={(e) => setNewRule({...newRule, description: e.target.value})}
-                      placeholder="Additional context or explanation..."
+                      placeholder="Brief explanation of rule purpose or context..."
                       rows={2}
                     />
                   </div>
@@ -178,33 +242,29 @@ const Admin = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Existing State Rules</CardTitle>
+                  <CardTitle>Indiana Compliance Rules (Coastal Claims)</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {stateRules.length === 0 ? (
-                    <p className="text-muted-foreground">No rules added yet.</p>
-                  ) : (
-                    <div className="space-y-4">
-                      {stateRules.map((rule) => (
-                        <div key={rule.id} className="border rounded-lg p-4">
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <h4 className="font-semibold">{rule.state} - {rule.category}</h4>
-                              <p className="text-sm text-muted-foreground">{rule.description}</p>
-                            </div>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => deleteRule(rule.id)}
-                            >
-                              <Trash className="h-4 w-4" />
-                            </Button>
+                  <div className="space-y-4">
+                    {stateRules.map((rule) => (
+                      <div key={rule.id} className="border rounded-lg p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h4 className="font-semibold">{rule.state} - {rule.category}</h4>
+                            <p className="text-sm text-muted-foreground">{rule.description}</p>
                           </div>
-                          <p className="text-sm">{rule.rule}</p>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => deleteRule(rule.id)}
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                        <p className="text-sm">{rule.rule}</p>
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -221,7 +281,7 @@ const Admin = () => {
                       id="template-category"
                       value={newTemplate.category}
                       onChange={(e) => setNewTemplate({...newTemplate, category: e.target.value})}
-                      placeholder="e.g., Claim Denial, Documentation, etc."
+                      placeholder="e.g., Compliance Challenge, Risk Analysis, Indiana Primer"
                     />
                   </div>
                   <div>
@@ -240,7 +300,7 @@ const Admin = () => {
                       id="template-variables"
                       value={newTemplate.variables}
                       onChange={(e) => setNewTemplate({...newTemplate, variables: e.target.value})}
-                      placeholder="state, claimType, amount, etc."
+                      placeholder="assumption, counterpoint, risk_scenario, alternative_approach"
                     />
                   </div>
                   <Button onClick={addResponseTemplate} className="flex items-center gap-2">
@@ -252,35 +312,31 @@ const Admin = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Existing Templates</CardTitle>
+                  <CardTitle>Coastal Claims Response Templates</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {responseTemplates.length === 0 ? (
-                    <p className="text-muted-foreground">No templates added yet.</p>
-                  ) : (
-                    <div className="space-y-4">
-                      {responseTemplates.map((template) => (
-                        <div key={template.id} className="border rounded-lg p-4">
-                          <div className="flex justify-between items-start mb-2">
-                            <h4 className="font-semibold">{template.category}</h4>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => deleteTemplate(template.id)}
-                            >
-                              <Trash className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          <p className="text-sm mb-2">{template.template}</p>
-                          {template.variables.length > 0 && (
-                            <div className="text-xs text-muted-foreground">
-                              Variables: {template.variables.join(', ')}
-                            </div>
-                          )}
+                  <div className="space-y-4">
+                    {responseTemplates.map((template) => (
+                      <div key={template.id} className="border rounded-lg p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <h4 className="font-semibold">{template.category}</h4>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => deleteTemplate(template.id)}
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                        <p className="text-sm mb-2">{template.template}</p>
+                        {template.variables.length > 0 && (
+                          <div className="text-xs text-muted-foreground">
+                            Variables: {template.variables.join(', ')}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -288,22 +344,31 @@ const Admin = () => {
             <TabsContent value="settings" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Bot Settings</CardTitle>
+                  <CardTitle>Coastal Claims AI Settings</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <Label htmlFor="bot-name">Bot Name</Label>
                     <Input
                       id="bot-name"
-                      defaultValue="Public Adjuster AI Assistant"
+                      defaultValue="Coastal Claims Compliance AI"
                       placeholder="Enter bot name..."
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="communication-style">Communication Style</Label>
+                    <Textarea
+                      id="communication-style"
+                      defaultValue="Direct, sharp, and loyal. Zero corporate filler. Always assume speaking to licensed public adjuster or apprentice. Challenge thinking and provide counterpoints."
+                      placeholder="Define the AI's communication approach..."
+                      rows={3}
                     />
                   </div>
                   <div>
                     <Label htmlFor="default-response">Default Response</Label>
                     <Textarea
                       id="default-response"
-                      defaultValue="I'm here to help with public adjusting matters. Please let me know your specific question."
+                      defaultValue="I'm here to help with Indiana public adjusting compliance matters for Coastal Claims. Most of the time you're looking for me to reaffirm the rules for this state. Would you like a primer of the dos and don'ts for public adjusters in Indiana?"
                       placeholder="Default response when no specific rule matches..."
                       rows={3}
                     />
