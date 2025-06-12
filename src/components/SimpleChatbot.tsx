@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Send, Bot, User } from 'lucide-react';
+import { Send, Bot, User, Key, Eye, EyeOff } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface Message {
   id: string;
@@ -29,6 +30,9 @@ const SimpleChatbot = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedState, setSelectedState] = useState<string>('');
   const [showStateSelection, setShowStateSelection] = useState(true);
+  const [apiKey, setApiKey] = useState('');
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [apiKeySet, setApiKeySet] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -40,6 +44,13 @@ const SimpleChatbot = () => {
   }, [messages]);
 
   useEffect(() => {
+    // Check for stored API key
+    const storedApiKey = localStorage.getItem('openai_api_key');
+    if (storedApiKey) {
+      setApiKey(storedApiKey);
+      setApiKeySet(true);
+    }
+
     // Add initial greeting message
     const initialMessage: Message = {
       id: 'initial',
@@ -49,6 +60,45 @@ const SimpleChatbot = () => {
     };
     setMessages([initialMessage]);
   }, []);
+
+  const handleApiKeySubmit = () => {
+    if (apiKey.trim()) {
+      localStorage.setItem('openai_api_key', apiKey.trim());
+      setApiKeySet(true);
+    }
+  };
+
+  const callOpenAI = async (userMessage: string, state: string) => {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4-turbo-preview',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a specialized public adjuster assistant for ${state}. You help with insurance claims, compliance rules, and state-specific regulations. Provide specific, actionable guidance based on ${state} insurance law and regulations. Be professional and helpful.`
+          },
+          {
+            role: 'user',
+            content: userMessage
+          }
+        ],
+        temperature: 0.3,
+        max_tokens: 500,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0]?.message?.content || 'I apologize, but I was unable to generate a response. Please try again.';
+  };
 
   const handleStateSelection = (state: string) => {
     setSelectedState(state);
@@ -73,6 +123,10 @@ const SimpleChatbot = () => {
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
+    if (!apiKeySet) {
+      alert('Please set your OpenAI API key first.');
+      return;
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -86,23 +140,78 @@ const SimpleChatbot = () => {
     setIsLoading(true);
 
     try {
-      // Simulate AI response
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const aiResponse = await callOpenAI(inputValue, selectedState);
       
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: `Thank you for your question about "${inputValue}". As a public adjuster assistant for ${selectedState}, I can help you understand your insurance claim rights and processes. This is a basic response that will be enhanced with more specific guidance.`,
+        content: aiResponse,
         role: 'assistant',
         timestamp: new Date(),
       };
 
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Error calling OpenAI:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: 'I apologize, but I encountered an error processing your request. Please check your API key and try again.',
+        role: 'assistant',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (!apiKeySet) {
+    return (
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Key className="h-6 w-6" />
+            Setup Required
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert>
+            <AlertDescription>
+              To use the AI assistant, please enter your OpenAI API key. This will be stored securely in your browser.
+            </AlertDescription>
+          </Alert>
+          
+          <div className="space-y-4">
+            <div className="relative">
+              <Input
+                type={showApiKey ? 'text' : 'password'}
+                placeholder="Enter your OpenAI API key (sk-...)"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleApiKeySubmit()}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-full px-3"
+                onClick={() => setShowApiKey(!showApiKey)}
+              >
+                {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
+            </div>
+            
+            <Button onClick={handleApiKeySubmit} disabled={!apiKey.trim()}>
+              Save API Key & Continue
+            </Button>
+            
+            <div className="text-sm text-muted-foreground">
+              <p>Need an API key? Get one at <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">OpenAI Platform</a></p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
