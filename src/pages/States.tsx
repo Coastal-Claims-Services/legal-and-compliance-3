@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ThemeProvider } from '../components/theme-provider';
 import { ThemeToggle } from '../components/theme-toggle';
@@ -7,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, MapPin, AlertTriangle, FileText, Settings, Plus, Search } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { PinProtection } from '../components/PinProtection';
 
 const US_STATES = [
   'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware',
@@ -53,6 +53,9 @@ const STATE_DATA = {
 
 const States = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [showPinDialog, setShowPinDialog] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{ type: 'rules' | 'configure'; state: string } | null>(null);
+  const navigate = useNavigate();
 
   const filteredStates = US_STATES.filter(state =>
     state.toLowerCase().includes(searchTerm.toLowerCase())
@@ -85,6 +88,28 @@ const States = () => {
     return status === 'active' 
       ? <Badge className="bg-blue-100 text-blue-800">Active</Badge>
       : <Badge variant="outline">Inactive</Badge>;
+  };
+
+  const handleProtectedAction = (type: 'rules' | 'configure', state: string) => {
+    setPendingAction({ type, state });
+    setShowPinDialog(true);
+  };
+
+  const handlePinSuccess = () => {
+    if (pendingAction) {
+      if (pendingAction.type === 'rules') {
+        navigate(`/admin?state=${pendingAction.state}`);
+      } else {
+        navigate(`/admin?state=${pendingAction.state}&tab=settings`);
+      }
+    }
+    setShowPinDialog(false);
+    setPendingAction(null);
+  };
+
+  const handlePinClose = () => {
+    setShowPinDialog(false);
+    setPendingAction(null);
   };
 
   return (
@@ -164,18 +189,24 @@ const States = () => {
                     )}
 
                     <div className="flex gap-2 pt-2">
-                      <Link to={`/admin?state=${state}`} className="flex-1">
-                        <Button variant="outline" size="sm" className="w-full flex items-center gap-2">
-                          <FileText className="h-3 w-3" />
-                          Manage Rules
-                        </Button>
-                      </Link>
-                      <Link to={`/admin?state=${state}&tab=settings`} className="flex-1">
-                        <Button variant="outline" size="sm" className="w-full flex items-center gap-2">
-                          <Settings className="h-3 w-3" />
-                          Configure
-                        </Button>
-                      </Link>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1 flex items-center gap-2"
+                        onClick={() => handleProtectedAction('rules', state)}
+                      >
+                        <FileText className="h-3 w-3" />
+                        Manage Rules
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1 flex items-center gap-2"
+                        onClick={() => handleProtectedAction('configure', state)}
+                      >
+                        <Settings className="h-3 w-3" />
+                        Configure
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -193,6 +224,13 @@ const States = () => {
             </Card>
           )}
         </div>
+
+        <PinProtection
+          isOpen={showPinDialog}
+          onClose={handlePinClose}
+          onSuccess={handlePinSuccess}
+          title="Admin Access Required"
+        />
       </div>
     </ThemeProvider>
   );
