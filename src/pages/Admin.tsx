@@ -8,9 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Settings, Database, FileText, Plus, Edit, Trash, ArrowLeft } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Settings, Database, FileText, Plus, Edit, Trash, ArrowLeft, AlertTriangle, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { StateRuleManager } from '../components/StateRuleManager';
+import { StateRule, ResponseTemplate, ComplianceAlert } from '../types/admin';
 
 const US_STATES = [
   'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware',
@@ -22,63 +24,102 @@ const US_STATES = [
   'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
 ];
 
-interface StateRule {
-  id: string;
-  state: string;
-  category: string;
-  rule: string;
-  description: string;
-}
-
-interface ResponseTemplate {
-  id: string;
-  category: string;
-  template: string;
-  variables: string[];
-}
-
 const INITIAL_KENTUCKY_RULES: StateRule[] = [
   {
     id: '1',
     state: 'Kentucky',
-    category: 'Primary Guidance Protocol',
-    rule: 'Before answering ANY Kentucky compliance question: 1. Start by consulting KRS Chapter 304 (Kentucky Insurance Code) and 806 KAR regulations. 2. Distinguish between enforceable statutory duties vs. regulatory guidance without private enforcement. 3. Focus on policy language interpretation over unenforceable regulations. 4. Never promise outcomes based on regulations lacking private rights of action.',
-    description: 'Official source consultation protocol - prevents false promises based on unenforceable guidance'
+    category: 'Public Adjuster Compliance',
+    subcategory: 'License Requirements',
+    rule: 'Must hold a public adjuster license under KRS 304.9-430. Min age 18, exam required.',
+    description: 'Basic licensing requirements for Kentucky public adjusters',
+    confidence: 'Statutory',
+    sourceUrl: 'https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=45903',
+    effectiveDate: '2024-01-01',
+    version: '1.0',
+    lastUpdated: new Date().toISOString()
   },
   {
-    id: '2',
+    id: '2', 
     state: 'Kentucky',
-    category: 'Fee Shifting Reality',
-    rule: 'Kentucky does NOT provide fee-shifting in first-party insurance claims. KRS 304.12-230 prohibits unfair practices but creates NO attorney fee recovery. Adjusters pay their own legal costs (30-50% contingency). Factor this into ALL settlement strategies - insurers know you are paying legal fees.',
-    description: 'Hard stop on fee-shifting expectations - prevents unrealistic client promises'
+    category: 'Public Adjuster Compliance',
+    subcategory: 'Bond Requirements',
+    rule: 'Maintain a $50,000 surety bond or LOC; license terminates automatically if the bond lapses.',
+    description: 'Financial responsibility requirements - critical for license validity',
+    confidence: 'Statutory',
+    effectiveDate: '2024-01-01',
+    version: '1.0',
+    lastUpdated: new Date().toISOString()
   },
   {
     id: '3',
     state: 'Kentucky',
-    category: 'Matching Claims Strategy',
-    rule: 'For Kentucky matching disputes: 1. Analyze specific policy language for "like kind and quality" provisions first. 2. Reference 806 KAR 12:095 Section 9(1)(b) as regulatory guidance ONLY - NOT enforceable law. 3. Build arguments on contract interpretation, not Advisory Opinion 2023-08. 4. No private right of action = no litigation leverage. 5. Alternative: Focus on diminished value claims if matching unavailable.',
-    description: 'Prevents reliance on unenforceable matching regulations - forces policy-based arguments'
+    category: 'Public Adjuster Compliance', 
+    subcategory: 'Fee Caps & Structures',
+    rule: 'Non-cat claims: fee ≤ 15% of total recovery. Cat claims: fee ≤ 10%. If insurer pays policy limits within 72 hours of first notice, only time-based compensation allowed.',
+    description: 'Fee limitations effective 2024 - includes 72-hour policy limits restriction',
+    confidence: 'Statutory',
+    effectiveDate: '2024-01-01',
+    version: '1.0',
+    lastUpdated: new Date().toISOString()
   },
   {
     id: '4',
     state: 'Kentucky',
-    category: 'Bad Faith Standards',
-    rule: 'Kentucky bad faith requires proving insurer conduct was BOTH unreasonable AND in bad faith. UCSPA violations alone are insufficient. Must show deliberate misconduct or reckless disregard. High bar to meet. Do not oversell bad faith prospects to clients - focus on contract breaches instead.',
-    description: 'Sets realistic expectations for bad faith claims - prevents overselling weak cases'
+    category: 'Insurance Carrier Obligations',
+    subcategory: 'Payment Deadlines', 
+    rule: 'Insurer must pay undisputed claims within 30 days of satisfactory proof-of-loss per KRS 304.12-235. Unreasonable delay triggers 12% interest and reasonable attorney fees.',
+    description: 'Critical fee-shifting provision - creates leverage for payment disputes',
+    confidence: 'Statutory',
+    sourceUrl: 'https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=45903',
+    effectiveDate: '2024-01-01',
+    version: '1.0',
+    lastUpdated: new Date().toISOString()
   },
   {
     id: '5',
     state: 'Kentucky',
-    category: 'Insurer Response Timeframes',
-    rule: 'Kentucky insurers must acknowledge claims within 10 days and begin investigation promptly. No specific statutory deadline for claim decisions, but unreasonable delay can support UCSPA violation. Document all delays with dates and communications. Focus on "unreasonable delay" rather than specific day counts.',
-    description: 'Provides concrete timeframe expectations while avoiding false precision'
+    category: 'Construction Standards',
+    subcategory: 'Matching Requirements',
+    rule: '806 KAR 12:095 § 9(1)(b): if replacement items do not "reasonably match," insurer must replace all items in area for uniform appearance. DOI Advisory 2023-08 rejects line-of-sight limitations.',
+    description: 'Matching rule with regulatory guidance - no private enforcement but creates leverage',
+    confidence: 'Regulatory',
+    sourceUrl: 'https://insurance.ky.gov/pdffiles/Advisory_Opinion_2023-08.pdf',
+    effectiveDate: '2023-08-01',
+    version: '1.0', 
+    lastUpdated: new Date().toISOString()
   },
   {
     id: '6',
     state: 'Kentucky',
-    category: 'Behavior & Communication',
-    rule: 'Be direct, sharp, and legally precise. Always assume speaking to licensed public adjuster. Challenge assumptions, provide counterpoints, test reasoning. No optimistic interpretations of weak legal positions. If the law is against us, say so and pivot to stronger arguments.',
-    description: 'Communication style requirements - prevents wishful thinking and lazy analysis'
+    category: 'Legal Framework',
+    subcategory: 'Bad Faith Standards',
+    rule: 'Kentucky bad faith requires proving insurer conduct was BOTH unreasonable AND in bad faith. UCSPA violations alone insufficient. Must show deliberate misconduct or reckless disregard.',
+    description: 'High bar for bad faith - prevents overselling weak cases to clients',
+    confidence: 'Statutory',
+    effectiveDate: '2024-01-01',
+    version: '1.0',
+    lastUpdated: new Date().toISOString()
+  }
+];
+
+const INITIAL_COMPLIANCE_ALERTS: ComplianceAlert[] = [
+  {
+    id: '1',
+    state: 'Kentucky',
+    type: 'Rule Change',
+    message: 'New fee cap legislation effective January 1, 2024. Review all active contracts.',
+    priority: 'High',
+    date: new Date().toISOString(),
+    resolved: false
+  },
+  {
+    id: '2', 
+    state: 'Florida',
+    type: 'Bond Expiration',
+    message: '5 adjusters have bonds expiring within 30 days. Renewal required.',
+    priority: 'High',
+    date: new Date().toISOString(),
+    resolved: false
   }
 ];
 
@@ -111,32 +152,21 @@ const INITIAL_RESPONSE_TEMPLATES: ResponseTemplate[] = [
 
 const Admin = () => {
   const [stateRules, setStateRules] = useState<StateRule[]>(INITIAL_KENTUCKY_RULES);
-  const [responseTemplates, setResponseTemplates] = useState<ResponseTemplate[]>(INITIAL_RESPONSE_TEMPLATES);
+  const [responseTemplates, setResponseTemplates] = useState<ResponseTemplate[]>([]);
+  const [complianceAlerts, setComplianceAlerts] = useState<ComplianceAlert[]>(INITIAL_COMPLIANCE_ALERTS);
   const [selectedState, setSelectedState] = useState<string>('');
-  const [newRule, setNewRule] = useState({
-    category: '',
-    rule: '',
-    description: ''
-  });
   const [newTemplate, setNewTemplate] = useState({
     category: '',
     template: '',
     variables: ''
   });
 
-  const addStateRule = () => {
-    if (!selectedState || !newRule.category || !newRule.rule) return;
-    
-    const rule: StateRule = {
-      id: Date.now().toString(),
-      state: selectedState,
-      category: newRule.category,
-      rule: newRule.rule,
-      description: newRule.description
-    };
-    
+  const addStateRule = (rule: StateRule) => {
     setStateRules([...stateRules, rule]);
-    setNewRule({ category: '', rule: '', description: '' });
+  };
+
+  const deleteRule = (id: string) => {
+    setStateRules(stateRules.filter(rule => rule.id !== id));
   };
 
   const addResponseTemplate = () => {
@@ -146,20 +176,28 @@ const Admin = () => {
       id: Date.now().toString(),
       category: newTemplate.category,
       template: newTemplate.template,
-      variables: newTemplate.variables.split(',').map(v => v.trim()).filter(v => v)
+      variables: newTemplate.variables.split(',').map(v => v.trim()).filter(v => v),
+      confidence: 'Medium',
+      lastUpdated: new Date().toISOString()
     };
     
     setResponseTemplates([...responseTemplates, template]);
     setNewTemplate({ category: '', template: '', variables: '' });
   };
 
-  const deleteRule = (id: string) => {
-    setStateRules(stateRules.filter(rule => rule.id !== id));
-  };
-
   const deleteTemplate = (id: string) => {
     setResponseTemplates(responseTemplates.filter(template => template.id !== id));
   };
+
+  const resolveAlert = (id: string) => {
+    setComplianceAlerts(alerts => 
+      alerts.map(alert => 
+        alert.id === id ? { ...alert, resolved: true } : alert
+      )
+    );
+  };
+
+  const unresolvedAlerts = complianceAlerts.filter(alert => !alert.resolved);
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="ui-theme">
@@ -175,10 +213,99 @@ const Admin = () => {
               </Link>
               <div className="text-center">
                 <h1 className="text-4xl font-bold mb-4">Coastal Claims Admin</h1>
-                <p className="text-xl text-muted-foreground">Manage Compliance Rules & AI Templates</p>
+                <p className="text-xl text-muted-foreground">Compliance Rules & AI Management System</p>
               </div>
             </div>
-            <ThemeToggle />
+            <div className="flex items-center gap-4">
+              {unresolvedAlerts.length > 0 && (
+                <Badge variant="destructive" className="flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3" />
+                  {unresolvedAlerts.length} Alerts
+                </Badge>
+              )}
+              <ThemeToggle />
+            </div>
+          </div>
+
+          {unresolvedAlerts.length > 0 && (
+            <Card className="mb-6 border-red-200">
+              <CardHeader>
+                <CardTitle className="text-red-800 flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5" />
+                  Compliance Alerts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {unresolvedAlerts.slice(0, 3).map((alert) => (
+                    <div key={alert.id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Badge variant={alert.priority === 'High' ? 'destructive' : 'secondary'}>
+                          {alert.priority}
+                        </Badge>
+                        <span className="font-medium">{alert.state}</span>
+                        <span>{alert.message}</span>
+                      </div>
+                      <Button size="sm" variant="outline" onClick={() => resolveAlert(alert.id)}>
+                        Resolve
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-sm font-medium">Active Rules: {stateRules.length}</span>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span className="text-sm font-medium">States Covered: {new Set(stateRules.map(r => r.state)).size}</span>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                  <span className="text-sm font-medium">Templates: {responseTemplates.length}</span>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Last Updated: {new Date().toLocaleDateString()}</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="mb-6">
+            <Label htmlFor="state-filter">Filter by State</Label>
+            <Select value={selectedState} onValueChange={setSelectedState}>
+              <SelectTrigger className="w-64">
+                <SelectValue placeholder="All states..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All States</SelectItem>
+                {US_STATES.map((state) => (
+                  <SelectItem key={state} value={state}>
+                    {state}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <Tabs defaultValue="rules" className="w-full">
@@ -198,91 +325,13 @@ const Admin = () => {
             </TabsList>
 
             <TabsContent value="rules" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Add New State Rule</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="state-select">State</Label>
-                      <Select value={selectedState} onValueChange={setSelectedState}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select state..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {US_STATES.map((state) => (
-                            <SelectItem key={state} value={state}>
-                              {state}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="category">Category</Label>
-                      <Input
-                        id="category"
-                        value={newRule.category}
-                        onChange={(e) => setNewRule({...newRule, category: e.target.value})}
-                        placeholder="e.g., Primary Guidance Protocol, Compliance Analysis"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="rule">Rule</Label>
-                    <Textarea
-                      id="rule"
-                      value={newRule.rule}
-                      onChange={(e) => setNewRule({...newRule, rule: e.target.value})}
-                      placeholder="Enter the specific compliance rule or protocol..."
-                      rows={3}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={newRule.description}
-                      onChange={(e) => setNewRule({...newRule, description: e.target.value})}
-                      placeholder="Brief explanation of rule purpose or context..."
-                      rows={2}
-                    />
-                  </div>
-                  <Button onClick={addStateRule} className="flex items-center gap-2">
-                    <Plus className="h-4 w-4" />
-                    Add Rule
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Indiana Compliance Rules (Coastal Claims)</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {stateRules.map((rule) => (
-                      <div key={rule.id} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h4 className="font-semibold">{rule.state} - {rule.category}</h4>
-                            <p className="text-sm text-muted-foreground">{rule.description}</p>
-                          </div>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => deleteRule(rule.id)}
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <p className="text-sm">{rule.rule}</p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              <StateRuleManager
+                stateRules={stateRules}
+                onAddRule={addStateRule}
+                onDeleteRule={deleteRule}
+                selectedState={selectedState}
+                onStateChange={setSelectedState}
+              />
             </TabsContent>
 
             <TabsContent value="templates" className="space-y-6">
@@ -297,7 +346,7 @@ const Admin = () => {
                       id="template-category"
                       value={newTemplate.category}
                       onChange={(e) => setNewTemplate({...newTemplate, category: e.target.value})}
-                      placeholder="e.g., Compliance Challenge, Risk Analysis, Indiana Primer"
+                      placeholder="e.g., Fee-Shifting Challenge, Matching Dispute, Bond Alert"
                     />
                   </div>
                   <div>
@@ -316,7 +365,7 @@ const Admin = () => {
                       id="template-variables"
                       value={newTemplate.variables}
                       onChange={(e) => setNewTemplate({...newTemplate, variables: e.target.value})}
-                      placeholder="assumption, counterpoint, risk_scenario, alternative_approach"
+                      placeholder="state, deadline_date, fee_percentage, bond_amount"
                     />
                   </div>
                   <Button onClick={addResponseTemplate} className="flex items-center gap-2">
@@ -328,14 +377,17 @@ const Admin = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Coastal Claims Response Templates</CardTitle>
+                  <CardTitle>Response Templates</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     {responseTemplates.map((template) => (
                       <div key={template.id} className="border rounded-lg p-4">
                         <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-semibold">{template.category}</h4>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold">{template.category}</h4>
+                            <Badge>{template.confidence}</Badge>
+                          </div>
                           <Button
                             variant="destructive"
                             size="sm"
@@ -360,7 +412,7 @@ const Admin = () => {
             <TabsContent value="settings" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Coastal Claims AI Settings</CardTitle>
+                  <CardTitle>System Settings</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
@@ -372,22 +424,31 @@ const Admin = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="communication-style">Communication Style</Label>
-                    <Textarea
-                      id="communication-style"
-                      defaultValue="Direct, sharp, and loyal. Zero corporate filler. Always assume speaking to licensed public adjuster or apprentice. Challenge thinking and provide counterpoints."
-                      placeholder="Define the AI's communication approach..."
-                      rows={3}
-                    />
+                    <Label htmlFor="update-frequency">Rule Update Frequency</Label>
+                    <Select defaultValue="daily">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="realtime">Real-time</SelectItem>
+                        <SelectItem value="hourly">Hourly</SelectItem>
+                        <SelectItem value="daily">Daily</SelectItem>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
-                    <Label htmlFor="default-response">Default Response</Label>
-                    <Textarea
-                      id="default-response"
-                      defaultValue="I'm here to help with Indiana public adjusting compliance matters for Coastal Claims. Most of the time you're looking for me to reaffirm the rules for this state. Would you like a primer of the dos and don'ts for public adjusters in Indiana?"
-                      placeholder="Default response when no specific rule matches..."
-                      rows={3}
-                    />
+                    <Label htmlFor="confidence-threshold">Minimum Confidence Level</Label>
+                    <Select defaultValue="regulatory">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="statutory">Statutory Only</SelectItem>
+                        <SelectItem value="regulatory">Regulatory & Above</SelectItem>
+                        <SelectItem value="advisory">All Sources</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <Button>Save Settings</Button>
                 </CardContent>
