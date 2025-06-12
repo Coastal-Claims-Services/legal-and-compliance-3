@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ThemeProvider } from '../components/theme-provider';
 import { ThemeToggle } from '../components/theme-toggle';
@@ -128,25 +129,33 @@ const INITIAL_RESPONSE_TEMPLATES: ResponseTemplate[] = [
     id: '1',
     category: 'Reality Check',
     template: 'Let me challenge your assumptions here: {assumption}. The problem with that approach is {legal_weakness}. A stronger strategy would be {alternative_approach} because {reasoning}. The risk you are not seeing is {compliance_risk}.',
-    variables: ['assumption', 'legal_weakness', 'alternative_approach', 'reasoning', 'compliance_risk']
+    variables: ['assumption', 'legal_weakness', 'alternative_approach', 'reasoning', 'compliance_risk'],
+    confidence: 'High',
+    lastUpdated: new Date().toISOString()
   },
   {
     id: '2',
     category: 'Kentucky Hard Facts',
     template: 'Here are the hard facts for Kentucky: NO fee-shifting in first-party claims. {specific_law} creates {actual_remedy}, not attorney fees. Your contingency fee is {percentage}. Insurer knows this. Strategy: {adjusted_approach}.',
-    variables: ['specific_law', 'actual_remedy', 'percentage', 'adjusted_approach']
+    variables: ['specific_law', 'actual_remedy', 'percentage', 'adjusted_approach'],
+    confidence: 'High',
+    lastUpdated: new Date().toISOString()
   },
   {
     id: '3',
     category: 'Enforcement Gap Warning',
     template: 'Warning: {regulation_cited} has no private right of action. You cannot sue based on this. It is guidance only. Focus instead on {enforceable_provision} because {legal_reasoning}.',
-    variables: ['regulation_cited', 'enforceable_provision', 'legal_reasoning']
+    variables: ['regulation_cited', 'enforceable_provision', 'legal_reasoning'],
+    confidence: 'Medium',
+    lastUpdated: new Date().toISOString()
   },
   {
     id: '4',
     category: 'Timeframe Compliance',
     template: 'Kentucky insurer response requirements: Acknowledge in 10 days, investigate promptly. No statutory decision deadline. Document delays starting {start_date}. Unreasonable delay claim requires {evidence_needed}. Current delay status: {assessment}.',
-    variables: ['start_date', 'evidence_needed', 'assessment']
+    variables: ['start_date', 'evidence_needed', 'assessment'],
+    confidence: 'High',
+    lastUpdated: new Date().toISOString()
   }
 ];
 
