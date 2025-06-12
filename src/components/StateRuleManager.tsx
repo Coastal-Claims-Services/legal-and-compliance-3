@@ -26,7 +26,7 @@ const RULE_CATEGORIES = [
   'Professional Resources'
 ] as const;
 
-const CONFIDENCE_LEVELS = ['Statutory', 'Regulatory', 'Advisory'] as const;
+const CONFIDENCE_LEVELS = ['HIGH', 'MEDIUM', 'LOW'] as const;
 
 const SUBCATEGORIES = {
   'Public Adjuster Compliance': [
@@ -81,60 +81,57 @@ export const StateRuleManager: React.FC<StateRuleManagerProps> = ({
   const [newRule, setNewRule] = useState({
     category: '' as StateRule['category'],
     subcategory: '',
-    rule: '',
-    description: '',
-    confidence: 'Regulatory' as StateRule['confidence'],
-    sourceUrl: '',
-    effectiveDate: new Date().toISOString().split('T')[0],
-    expirationDate: ''
+    text: '',
+    confidence: 'MEDIUM' as StateRule['confidence'],
+    sources: '',
+    sunset: ''
   });
 
   const addStateRule = () => {
-    if (!selectedState || !newRule.category || !newRule.subcategory || !newRule.rule) return;
+    if (!selectedState || !newRule.category || !newRule.subcategory || !newRule.text) return;
     
     const rule: StateRule = {
       id: Date.now().toString(),
       state: selectedState,
+      rule_id: `${selectedState}-${newRule.category.replace(/\s+/g, '-').toUpperCase()}-${Date.now()}`,
+      version: '1.0',
+      last_updated: new Date().toISOString(),
+      authority_level: 'REG',
+      confidence: newRule.confidence,
+      sunset: newRule.sunset || undefined,
       category: newRule.category,
       subcategory: newRule.subcategory,
-      rule: newRule.rule,
-      description: newRule.description,
-      confidence: newRule.confidence,
-      sourceUrl: newRule.sourceUrl || undefined,
-      effectiveDate: newRule.effectiveDate,
-      expirationDate: newRule.expirationDate || undefined,
-      version: '1.0',
-      lastUpdated: new Date().toISOString()
+      text: newRule.text,
+      sources: newRule.sources.split('\n').filter(s => s.trim()),
+      tests: []
     };
     
     onAddRule(rule);
     setNewRule({
       category: '' as StateRule['category'],
       subcategory: '',
-      rule: '',
-      description: '',
-      confidence: 'Regulatory',
-      sourceUrl: '',
-      effectiveDate: new Date().toISOString().split('T')[0],
-      expirationDate: ''
+      text: '',
+      confidence: 'MEDIUM',
+      sources: '',
+      sunset: ''
     });
   };
 
   const getConfidenceBadgeColor = (confidence: StateRule['confidence']) => {
     switch (confidence) {
-      case 'Statutory': return 'bg-green-100 text-green-800';
-      case 'Regulatory': return 'bg-blue-100 text-blue-800';
-      case 'Advisory': return 'bg-yellow-100 text-yellow-800';
+      case 'HIGH': return 'bg-green-100 text-green-800';
+      case 'MEDIUM': return 'bg-blue-100 text-blue-800';
+      case 'LOW': return 'bg-yellow-100 text-yellow-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const isExpiringSoon = (rule: StateRule) => {
-    if (!rule.expirationDate) return false;
-    const expirationDate = new Date(rule.expirationDate);
+    if (!rule.sunset) return false;
+    const sunsetDate = new Date(rule.sunset);
     const thirtyDaysFromNow = new Date();
     thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
-    return expirationDate <= thirtyDaysFromNow;
+    return sunsetDate <= thirtyDaysFromNow;
   };
 
   return (
@@ -192,56 +189,35 @@ export const StateRuleManager: React.FC<StateRuleManagerProps> = ({
             </div>
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="effectiveDate">Effective Date</Label>
-              <Input
-                id="effectiveDate"
-                type="date"
-                value={newRule.effectiveDate}
-                onChange={(e) => setNewRule({...newRule, effectiveDate: e.target.value})}
-              />
-            </div>
-            <div>
-              <Label htmlFor="expirationDate">Expiration Date (optional)</Label>
-              <Input
-                id="expirationDate"
-                type="date"
-                value={newRule.expirationDate}
-                onChange={(e) => setNewRule({...newRule, expirationDate: e.target.value})}
-              />
-            </div>
-          </div>
-
           <div>
-            <Label htmlFor="sourceUrl">Source URL (optional)</Label>
+            <Label htmlFor="sunset">Sunset Date (optional)</Label>
             <Input
-              id="sourceUrl"
-              value={newRule.sourceUrl}
-              onChange={(e) => setNewRule({...newRule, sourceUrl: e.target.value})}
-              placeholder="https://insurance.ky.gov/..."
+              id="sunset"
+              type="date"
+              value={newRule.sunset}
+              onChange={(e) => setNewRule({...newRule, sunset: e.target.value})}
             />
           </div>
 
           <div>
-            <Label htmlFor="rule">Rule Text</Label>
+            <Label htmlFor="sources">Sources (one per line)</Label>
             <Textarea
-              id="rule"
-              value={newRule.rule}
-              onChange={(e) => setNewRule({...newRule, rule: e.target.value})}
-              placeholder="Enter the specific compliance rule or protocol..."
+              id="sources"
+              value={newRule.sources}
+              onChange={(e) => setNewRule({...newRule, sources: e.target.value})}
+              placeholder="KRS 304.12-235(1)-(3)&#10;806 KAR 12:095 § 6(2)(d)"
               rows={3}
             />
           </div>
-          
+
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="text">Rule Text</Label>
             <Textarea
-              id="description"
-              value={newRule.description}
-              onChange={(e) => setNewRule({...newRule, description: e.target.value})}
-              placeholder="Brief explanation of rule purpose or context..."
-              rows={2}
+              id="text"
+              value={newRule.text}
+              onChange={(e) => setNewRule({...newRule, text: e.target.value})}
+              placeholder="Enter the specific compliance rule or protocol..."
+              rows={3}
             />
           </div>
           
@@ -278,7 +254,6 @@ export const StateRuleManager: React.FC<StateRuleManagerProps> = ({
                       )}
                     </div>
                     <p className="text-sm font-medium text-muted-foreground">{rule.subcategory}</p>
-                    <p className="text-sm text-muted-foreground mb-2">{rule.description}</p>
                   </div>
                   <Button
                     variant="destructive"
@@ -288,23 +263,21 @@ export const StateRuleManager: React.FC<StateRuleManagerProps> = ({
                     <Trash className="h-4 w-4" />
                   </Button>
                 </div>
-                <p className="text-sm">{rule.rule}</p>
+                <p className="text-sm">{rule.text}</p>
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
-                    Effective: {new Date(rule.effectiveDate).toLocaleDateString()}
+                    Updated: {new Date(rule.last_updated).toLocaleDateString()}
                   </span>
-                  {rule.expirationDate && (
+                  {rule.sunset && (
                     <span className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      Expires: {new Date(rule.expirationDate).toLocaleDateString()}
+                      Expires: {new Date(rule.sunset).toLocaleDateString()}
                     </span>
                   )}
                   <span>v{rule.version}</span>
-                  {rule.sourceUrl && (
-                    <a href={rule.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                      Source
-                    </a>
+                  {rule.sources.length > 0 && (
+                    <span>Sources: {rule.sources.length}</span>
                   )}
                 </div>
               </div>
