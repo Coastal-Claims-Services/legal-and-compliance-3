@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ThemeProvider } from '../components/theme-provider';
 import { ThemeToggle } from '../components/theme-toggle';
@@ -162,8 +163,8 @@ const Admin = () => {
                   Back to AI
                 </Button>
               </Link>
-              <div className="text-center">
-                <h1 className="text-4xl font-bold mb-4">Coastal Claims Admin</h1>
+              <div>
+                <h1 className="text-4xl font-bold mb-2">Coastal Claims Admin</h1>
                 <p className="text-xl text-muted-foreground">Enhanced Compliance Rules & AI Management System</p>
               </div>
             </div>
@@ -179,7 +180,7 @@ const Admin = () => {
           </div>
 
           {unresolvedAlerts.length > 0 && (
-            <Card className="mb-6 border-red-200">
+            <Card className="mb-6 border-red-200 bg-red-50">
               <CardHeader>
                 <CardTitle className="text-red-800 flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5" />
@@ -187,15 +188,15 @@ const Admin = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {unresolvedAlerts.slice(0, 3).map((alert) => (
-                    <div key={alert.id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-                      <div className="flex items-center gap-3">
+                    <div key={alert.id} className="flex items-center justify-between p-4 bg-white rounded-lg border border-red-100">
+                      <div className="flex items-center gap-3 flex-1">
                         <Badge variant={alert.priority === 'High' ? 'destructive' : 'secondary'}>
                           {alert.priority}
                         </Badge>
-                        <span className="font-medium">{alert.state}</span>
-                        <span>{alert.message}</span>
+                        <span className="font-medium text-sm">{alert.state}</span>
+                        <span className="text-sm">{alert.message}</span>
                         {alert.rule_id && (
                           <Badge variant="outline" className="text-xs">
                             {alert.rule_id}
