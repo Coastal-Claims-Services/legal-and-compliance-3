@@ -37,73 +37,80 @@ interface ResponseTemplate {
   variables: string[];
 }
 
-const INITIAL_INDIANA_RULES: StateRule[] = [
+const INITIAL_KENTUCKY_RULES: StateRule[] = [
   {
     id: '1',
-    state: 'Indiana',
+    state: 'Kentucky',
     category: 'Primary Guidance Protocol',
-    rule: 'Before answering ANY compliance question: 1. Start by consulting the official Indiana Department of Insurance website (https://www.in.gov/idoi/adjusters/ and https://iga.in.gov/laws/2024/ic/titles/27#27-1-27). 2. Cross-check applicable statutes in other states if claim involves multi-state considerations. 3. Reference relevant case law where appropriate.',
-    description: 'Official source consultation protocol for all compliance inquiries'
+    rule: 'Before answering ANY Kentucky compliance question: 1. Start by consulting KRS Chapter 304 (Kentucky Insurance Code) and 806 KAR regulations. 2. Distinguish between enforceable statutory duties vs. regulatory guidance without private enforcement. 3. Focus on policy language interpretation over unenforceable regulations. 4. Never promise outcomes based on regulations lacking private rights of action.',
+    description: 'Official source consultation protocol - prevents false promises based on unenforceable guidance'
   },
   {
     id: '2',
-    state: 'Indiana',
-    category: 'Behavior & Communication',
-    rule: 'Be direct, clear, and sharp. Always assume speaking to licensed public adjuster or apprentice. Avoid unnecessary legal jargon. No fluff. No corporate tone.',
-    description: 'Communication style requirements for Coastal Claims compliance responses'
+    state: 'Kentucky',
+    category: 'Fee Shifting Reality',
+    rule: 'Kentucky does NOT provide fee-shifting in first-party insurance claims. KRS 304.12-230 prohibits unfair practices but creates NO attorney fee recovery. Adjusters pay their own legal costs (30-50% contingency). Factor this into ALL settlement strategies - insurers know you are paying legal fees.',
+    description: 'Hard stop on fee-shifting expectations - prevents unrealistic client promises'
   },
   {
     id: '3',
-    state: 'Indiana',
-    category: 'Compliance Analysis',
-    rule: 'Each response must: Analyze assumptions ("What\'s being taken for granted that could pose risk?"), Provide counterpoints ("What would opposing adjuster challenge?"), Test reasoning ("Is there compliance gap or risk exposure?"), Offer safer alternatives.',
-    description: 'Required analytical framework for all compliance advice'
+    state: 'Kentucky',
+    category: 'Matching Claims Strategy',
+    rule: 'For Kentucky matching disputes: 1. Analyze specific policy language for "like kind and quality" provisions first. 2. Reference 806 KAR 12:095 Section 9(1)(b) as regulatory guidance ONLY - NOT enforceable law. 3. Build arguments on contract interpretation, not Advisory Opinion 2023-08. 4. No private right of action = no litigation leverage. 5. Alternative: Focus on diminished value claims if matching unavailable.',
+    description: 'Prevents reliance on unenforceable matching regulations - forces policy-based arguments'
   },
   {
     id: '4',
-    state: 'Indiana',
-    category: 'Case Law',
-    rule: 'Insurer required to match shingles on roof where insured had RCV policy and experts testified mismatched shingles/siding lowered property value. Erie Ins. Exch. v. Sams, 20 N.E.3d 182, 190 (Ind. Ct. App. 2014).',
-    description: 'Key Indiana precedent on matching requirements for roof claims'
+    state: 'Kentucky',
+    category: 'Bad Faith Standards',
+    rule: 'Kentucky bad faith requires proving insurer conduct was BOTH unreasonable AND in bad faith. UCSPA violations alone are insufficient. Must show deliberate misconduct or reckless disregard. High bar to meet. Do not oversell bad faith prospects to clients - focus on contract breaches instead.',
+    description: 'Sets realistic expectations for bad faith claims - prevents overselling weak cases'
   },
   {
     id: '5',
-    state: 'Indiana',
-    category: 'Guardrails',
-    rule: 'NEVER suggest contacting adjuster associations or outside organizations unless explicitly instructed. NEVER disclose internal sources, training materials, or document bases - proprietary to Coastal Claims.',
-    description: 'Restrictions on external referrals and information disclosure'
+    state: 'Kentucky',
+    category: 'Insurer Response Timeframes',
+    rule: 'Kentucky insurers must acknowledge claims within 10 days and begin investigation promptly. No specific statutory deadline for claim decisions, but unreasonable delay can support UCSPA violation. Document all delays with dates and communications. Focus on "unreasonable delay" rather than specific day counts.',
+    description: 'Provides concrete timeframe expectations while avoiding false precision'
+  },
+  {
+    id: '6',
+    state: 'Kentucky',
+    category: 'Behavior & Communication',
+    rule: 'Be direct, sharp, and legally precise. Always assume speaking to licensed public adjuster. Challenge assumptions, provide counterpoints, test reasoning. No optimistic interpretations of weak legal positions. If the law is against us, say so and pivot to stronger arguments.',
+    description: 'Communication style requirements - prevents wishful thinking and lazy analysis'
   }
 ];
 
 const INITIAL_RESPONSE_TEMPLATES: ResponseTemplate[] = [
   {
     id: '1',
-    category: 'Compliance Challenge',
-    template: 'Let me challenge your thinking here: {assumption}. What if {counterpoint}? Have you considered the risk of {risk_scenario}? A safer approach might be {alternative_approach}.',
-    variables: ['assumption', 'counterpoint', 'risk_scenario', 'alternative_approach']
+    category: 'Reality Check',
+    template: 'Let me challenge your assumptions here: {assumption}. The problem with that approach is {legal_weakness}. A stronger strategy would be {alternative_approach} because {reasoning}. The risk you are not seeing is {compliance_risk}.',
+    variables: ['assumption', 'legal_weakness', 'alternative_approach', 'reasoning', 'compliance_risk']
   },
   {
     id: '2',
-    category: 'Indiana Primer',
-    template: 'Here are the key dos and don\'ts for public adjusters in Indiana: DO: {dos}. DON\'T: {donts}. Critical compliance points: {critical_points}.',
-    variables: ['dos', 'donts', 'critical_points']
+    category: 'Kentucky Hard Facts',
+    template: 'Here are the hard facts for Kentucky: NO fee-shifting in first-party claims. {specific_law} creates {actual_remedy}, not attorney fees. Your contingency fee is {percentage}. Insurer knows this. Strategy: {adjusted_approach}.',
+    variables: ['specific_law', 'actual_remedy', 'percentage', 'adjusted_approach']
   },
   {
     id: '3',
-    category: 'Source Verification',
-    template: 'Per Indiana Department of Insurance requirements: {requirement}. Official source: {source_url}. This means for your claim: {practical_application}.',
-    variables: ['requirement', 'source_url', 'practical_application']
+    category: 'Enforcement Gap Warning',
+    template: 'Warning: {regulation_cited} has no private right of action. You cannot sue based on this. It is guidance only. Focus instead on {enforceable_provision} because {legal_reasoning}.',
+    variables: ['regulation_cited', 'enforceable_provision', 'legal_reasoning']
   },
   {
     id: '4',
-    category: 'Risk Analysis',
-    template: 'Compliance risk assessment: {current_approach} could expose Coastal Claims to {potential_risks}. Recommended action: {recommended_action}. Rationale: {rationale}.',
-    variables: ['current_approach', 'potential_risks', 'recommended_action', 'rationale']
+    category: 'Timeframe Compliance',
+    template: 'Kentucky insurer response requirements: Acknowledge in 10 days, investigate promptly. No statutory decision deadline. Document delays starting {start_date}. Unreasonable delay claim requires {evidence_needed}. Current delay status: {assessment}.',
+    variables: ['start_date', 'evidence_needed', 'assessment']
   }
 ];
 
 const Admin = () => {
-  const [stateRules, setStateRules] = useState<StateRule[]>(INITIAL_INDIANA_RULES);
+  const [stateRules, setStateRules] = useState<StateRule[]>(INITIAL_KENTUCKY_RULES);
   const [responseTemplates, setResponseTemplates] = useState<ResponseTemplate[]>(INITIAL_RESPONSE_TEMPLATES);
   const [selectedState, setSelectedState] = useState<string>('');
   const [newRule, setNewRule] = useState({
