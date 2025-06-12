@@ -1,17 +1,17 @@
-import * as React from "react"
-import * as SeparatorPrimitive from "@radix-ui/react-separator"
+
+import * as React from "@radix-ui/react-separator"
 
 import { cn } from "@/lib/utils"
 
 const Separator = React.forwardRef<
-  React.ElementRef<typeof SeparatorPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>
+  React.ElementRef<typeof React.Separator>,
+  React.ComponentPropsWithoutRef<typeof React.Separator>
 >(
   (
     { className, orientation = "horizontal", decorative = true, ...props },
     ref
   ) => (
-    <SeparatorPrimitive.Root
+    <React.Separator
       ref={ref}
       decorative={decorative}
       orientation={orientation}
@@ -24,6 +24,6 @@ const Separator = React.forwardRef<
     />
   )
 )
-Separator.displayName = SeparatorPrimitive.Root.displayName
+Separator.displayName = React.Separator.displayName
 
 export { Separator }
