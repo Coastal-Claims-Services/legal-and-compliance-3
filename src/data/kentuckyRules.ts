@@ -112,14 +112,14 @@ export const KENTUCKY_RULES: StateRule[] = [
     id: '7',
     state: 'Kentucky',
     rule_id: 'KY-PROP-MATCH-007',
-    version: '1.0',
+    version: '1.1',
     last_updated: '2025-06-12',
     authority_level: 'REG',
     confidence: 'HIGH',
     sunset: '2028-11-30',
     category: 'Construction Standards',
     subcategory: 'Matching Requirements',
-    text: 'If replacement items do not reasonably match in quality, color, and size, the insurer must replace all items in the area to achieve a reasonably uniform appearance. Applies to interior and exterior losses. No "line-of-sight" limitation is allowed.',
+    text: 'If replacement items do not reasonably match in quality, color, or size, the insurer must replace all items in the area to achieve a reasonably uniform appearance. Applies to interior and exterior losses. A "line-of-sight" limitation is prohibited.\n▶ Enforcement is administrative only—no private right of action.',
     sources: [
       '806 KAR 12:095 § 9(1)(b)',
       'DOI Advisory Opinion 2023-08'
@@ -127,6 +127,24 @@ export const KENTUCKY_RULES: StateRule[] = [
     tests: [
       { given: { match: false }, expect: 'FULL_AREA_REPLACE' },
       { given: { match: true }, expect: 'PATCH_OK' }
+    ]
+  },
+  {
+    id: '13',
+    state: 'Kentucky',
+    rule_id: 'KY-PROP-MATCH-008',
+    version: '0.9',
+    last_updated: '2025-06-12',
+    authority_level: 'CASE',
+    confidence: 'HIGH',
+    category: 'Construction Standards',
+    subcategory: 'Matching Requirements',
+    text: 'Federal courts have declined to imply a private cause of action under § 9(1)(b). In *Woods Apts., LLC v. United States Fire Ins. Co.*, 2013 U.S. Dist. LEXIS 105582 (W.D. Ky. 2013), the court held that full replacement of roof slopes was not required where policy language limited payment to damaged portions and the regulation created no enforceable duty to the insured.',
+    sources: [
+      'Woods Apts., LLC v. U.S. Fire Ins. Co., No. 3:11-CV-00041-H (W.D. Ky. July 29 2013)'
+    ],
+    tests: [
+      { given: { relies_only_on_reg: true }, expect: 'NO_PRIVATE_ACTION' }
     ]
   },
   {
