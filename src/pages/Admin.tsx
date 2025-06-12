@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ThemeProvider } from '../components/theme-provider';
 import { ThemeToggle } from '../components/theme-toggle';
@@ -153,7 +152,7 @@ const Admin = () => {
     setIsSourceModalOpen(false);
   };
 
-  // Filter alerts by selected state - NO MIXING STATES
+  // Fix the filtering logic - when "all" is selected, show all alerts
   const filteredAlerts = selectedState === 'all' 
     ? complianceAlerts 
     : complianceAlerts.filter(alert => alert.state === selectedState);
@@ -197,7 +196,7 @@ const Admin = () => {
               {unresolvedFilteredAlerts.length > 0 && (
                 <Badge variant="destructive" className="flex items-center gap-1">
                   <AlertTriangle className="h-3 w-3" />
-                  {unresolvedFilteredAlerts.length} {selectedState !== 'all' && `${selectedState} `}Alerts
+                  {unresolvedFilteredAlerts.length} Alert{unresolvedFilteredAlerts.length !== 1 ? 's' : ''}
                 </Badge>
               )}
               <ThemeToggle />
