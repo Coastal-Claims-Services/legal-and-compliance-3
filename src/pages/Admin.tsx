@@ -98,7 +98,7 @@ const Admin = () => {
   const [stateRules, setStateRules] = useState<StateRule[]>(KENTUCKY_RULES);
   const [responseTemplates, setResponseTemplates] = useState<ResponseTemplate[]>(INITIAL_RESPONSE_TEMPLATES);
   const [complianceAlerts, setComplianceAlerts] = useState<ComplianceAlert[]>(INITIAL_COMPLIANCE_ALERTS);
-  const [selectedState, setSelectedState] = useState<string>('Kentucky');
+  const [selectedState, setSelectedState] = useState<string>('all');
   const [newTemplate, setNewTemplate] = useState({
     category: '',
     template: '',
