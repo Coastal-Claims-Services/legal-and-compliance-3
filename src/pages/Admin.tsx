@@ -262,7 +262,7 @@ const Admin = () => {
                 <SelectValue placeholder="All states..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All States</SelectItem>
+                <SelectItem value="all">All States</SelectItem>
                 {US_STATES.map((state) => (
                   <SelectItem key={state} value={state}>
                     {state}
@@ -293,7 +293,7 @@ const Admin = () => {
                 stateRules={stateRules}
                 onAddRule={addStateRule}
                 onDeleteRule={deleteRule}
-                selectedState={selectedState}
+                selectedState={selectedState === 'all' ? '' : selectedState}
                 onStateChange={setSelectedState}
               />
             </TabsContent>
