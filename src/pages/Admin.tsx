@@ -184,7 +184,7 @@ const Admin = () => {
               <Link to="/states">
                 <Button variant="outline" size="sm" className="flex items-center gap-2">
                   <List className="h-4 w-4" />
-                  All States
+                  Back to States
                 </Button>
               </Link>
               <div>

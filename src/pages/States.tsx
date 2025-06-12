@@ -118,10 +118,10 @@ const States = () => {
         <div className="container mx-auto py-8">
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-4">
-              <Link to="/admin">
+              <Link to="/admin/details">
                 <Button variant="outline" size="sm" className="flex items-center gap-2">
                   <ArrowLeft className="h-4 w-4" />
-                  Back to Admin
+                  Admin Details
                 </Button>
               </Link>
               <div>
