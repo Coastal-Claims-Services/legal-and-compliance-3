@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ThemeProvider } from '../components/theme-provider';
 import { ThemeToggle } from '../components/theme-toggle';
@@ -12,8 +11,9 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Settings, Database, FileText, Plus, Edit, Trash, ArrowLeft, AlertTriangle, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { StateRuleManager } from '../components/StateRuleManager';
+import { EnhancedStateRuleManager } from '../components/EnhancedStateRuleManager';
 import { StateRule, ResponseTemplate, ComplianceAlert } from '../types/admin';
+import { KENTUCKY_RULES } from '../data/kentuckyRules';
 
 const US_STATES = [
   'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware',
@@ -25,84 +25,6 @@ const US_STATES = [
   'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
 ];
 
-const INITIAL_KENTUCKY_RULES: StateRule[] = [
-  {
-    id: '1',
-    state: 'Kentucky',
-    category: 'Public Adjuster Compliance',
-    subcategory: 'License Requirements',
-    rule: 'Must hold a public adjuster license under KRS 304.9-430. Min age 18, exam required.',
-    description: 'Basic licensing requirements for Kentucky public adjusters',
-    confidence: 'Statutory',
-    sourceUrl: 'https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=45903',
-    effectiveDate: '2024-01-01',
-    version: '1.0',
-    lastUpdated: new Date().toISOString()
-  },
-  {
-    id: '2', 
-    state: 'Kentucky',
-    category: 'Public Adjuster Compliance',
-    subcategory: 'Bond Requirements',
-    rule: 'Maintain a $50,000 surety bond or LOC; license terminates automatically if the bond lapses.',
-    description: 'Financial responsibility requirements - critical for license validity',
-    confidence: 'Statutory',
-    effectiveDate: '2024-01-01',
-    version: '1.0',
-    lastUpdated: new Date().toISOString()
-  },
-  {
-    id: '3',
-    state: 'Kentucky',
-    category: 'Public Adjuster Compliance', 
-    subcategory: 'Fee Caps & Structures',
-    rule: 'Non-cat claims: fee ≤ 15% of total recovery. Cat claims: fee ≤ 10%. If insurer pays policy limits within 72 hours of first notice, only time-based compensation allowed.',
-    description: 'Fee limitations effective 2024 - includes 72-hour policy limits restriction',
-    confidence: 'Statutory',
-    effectiveDate: '2024-01-01',
-    version: '1.0',
-    lastUpdated: new Date().toISOString()
-  },
-  {
-    id: '4',
-    state: 'Kentucky',
-    category: 'Insurance Carrier Obligations',
-    subcategory: 'Payment Deadlines', 
-    rule: 'Insurer must pay undisputed claims within 30 days of satisfactory proof-of-loss per KRS 304.12-235. Unreasonable delay triggers 12% interest and reasonable attorney fees.',
-    description: 'Critical fee-shifting provision - creates leverage for payment disputes',
-    confidence: 'Statutory',
-    sourceUrl: 'https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=45903',
-    effectiveDate: '2024-01-01',
-    version: '1.0',
-    lastUpdated: new Date().toISOString()
-  },
-  {
-    id: '5',
-    state: 'Kentucky',
-    category: 'Construction Standards',
-    subcategory: 'Matching Requirements',
-    rule: '806 KAR 12:095 § 9(1)(b): if replacement items do not "reasonably match," insurer must replace all items in area for uniform appearance. DOI Advisory 2023-08 rejects line-of-sight limitations.',
-    description: 'Matching rule with regulatory guidance - no private enforcement but creates leverage',
-    confidence: 'Regulatory',
-    sourceUrl: 'https://insurance.ky.gov/pdffiles/Advisory_Opinion_2023-08.pdf',
-    effectiveDate: '2023-08-01',
-    version: '1.0', 
-    lastUpdated: new Date().toISOString()
-  },
-  {
-    id: '6',
-    state: 'Kentucky',
-    category: 'Legal Framework',
-    subcategory: 'Bad Faith Standards',
-    rule: 'Kentucky bad faith requires proving insurer conduct was BOTH unreasonable AND in bad faith. UCSPA violations alone insufficient. Must show deliberate misconduct or reckless disregard.',
-    description: 'High bar for bad faith - prevents overselling weak cases to clients',
-    confidence: 'Statutory',
-    effectiveDate: '2024-01-01',
-    version: '1.0',
-    lastUpdated: new Date().toISOString()
-  }
-];
-
 const INITIAL_COMPLIANCE_ALERTS: ComplianceAlert[] = [
   {
     id: '1',
@@ -111,10 +33,21 @@ const INITIAL_COMPLIANCE_ALERTS: ComplianceAlert[] = [
     message: 'New fee cap legislation effective January 1, 2024. Review all active contracts.',
     priority: 'High',
     date: new Date().toISOString(),
-    resolved: false
+    resolved: false,
+    rule_id: 'KY-PUBADJ-FEES-003'
   },
   {
     id: '2', 
+    state: 'Kentucky',
+    type: 'Sunset Warning',
+    message: 'Matching rule 806 KAR 12:095 expires 2028-11-30. Monitor for renewal.',
+    priority: 'Medium',
+    date: new Date().toISOString(),
+    resolved: false,
+    rule_id: 'KY-PROP-MATCH-007'
+  },
+  {
+    id: '3',
     state: 'Florida',
     type: 'Bond Expiration',
     message: '5 adjusters have bonds expiring within 30 days. Renewal required.',
@@ -160,10 +93,10 @@ const INITIAL_RESPONSE_TEMPLATES: ResponseTemplate[] = [
 ];
 
 const Admin = () => {
-  const [stateRules, setStateRules] = useState<StateRule[]>(INITIAL_KENTUCKY_RULES);
-  const [responseTemplates, setResponseTemplates] = useState<ResponseTemplate[]>([]);
+  const [stateRules, setStateRules] = useState<StateRule[]>(KENTUCKY_RULES);
+  const [responseTemplates, setResponseTemplates] = useState<ResponseTemplate[]>(INITIAL_RESPONSE_TEMPLATES);
   const [complianceAlerts, setComplianceAlerts] = useState<ComplianceAlert[]>(INITIAL_COMPLIANCE_ALERTS);
-  const [selectedState, setSelectedState] = useState<string>('');
+  const [selectedState, setSelectedState] = useState<string>('Kentucky');
   const [newTemplate, setNewTemplate] = useState({
     category: '',
     template: '',
@@ -207,6 +140,15 @@ const Admin = () => {
   };
 
   const unresolvedAlerts = complianceAlerts.filter(alert => !alert.resolved);
+  const highConfidenceRules = stateRules.filter(rule => rule.confidence === 'HIGH').length;
+  const rulesWithTests = stateRules.filter(rule => rule.tests.length > 0).length;
+  const expiringSoonRules = stateRules.filter(rule => {
+    if (!rule.sunset) return false;
+    const sunsetDate = new Date(rule.sunset);
+    const sixtyDaysFromNow = new Date();
+    sixtyDaysFromNow.setDate(sixtyDaysFromNow.getDate() + 60);
+    return sunsetDate <= sixtyDaysFromNow;
+  }).length;
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="ui-theme">
@@ -222,7 +164,7 @@ const Admin = () => {
               </Link>
               <div className="text-center">
                 <h1 className="text-4xl font-bold mb-4">Coastal Claims Admin</h1>
-                <p className="text-xl text-muted-foreground">Compliance Rules & AI Management System</p>
+                <p className="text-xl text-muted-foreground">Enhanced Compliance Rules & AI Management System</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -254,6 +196,11 @@ const Admin = () => {
                         </Badge>
                         <span className="font-medium">{alert.state}</span>
                         <span>{alert.message}</span>
+                        {alert.rule_id && (
+                          <Badge variant="outline" className="text-xs">
+                            {alert.rule_id}
+                          </Badge>
+                        )}
                       </div>
                       <Button size="sm" variant="outline" onClick={() => resolveAlert(alert.id)}>
                         Resolve
@@ -265,12 +212,12 @@ const Admin = () => {
             </Card>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm font-medium">Active Rules: {stateRules.length}</span>
+                  <span className="text-sm font-medium">Total Rules: {stateRules.length}</span>
                 </div>
               </CardContent>
             </Card>
@@ -278,7 +225,15 @@ const Admin = () => {
               <CardContent className="p-4">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-sm font-medium">States Covered: {new Set(stateRules.map(r => r.state)).size}</span>
+                  <span className="text-sm font-medium">High Confidence: {highConfidenceRules}</span>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <span className="text-sm font-medium">With Tests: {rulesWithTests}</span>
                 </div>
               </CardContent>
             </Card>
@@ -286,7 +241,7 @@ const Admin = () => {
               <CardContent className="p-4">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                  <span className="text-sm font-medium">Templates: {responseTemplates.length}</span>
+                  <span className="text-sm font-medium">Expiring Soon: {expiringSoonRules}</span>
                 </div>
               </CardContent>
             </Card>
@@ -294,7 +249,7 @@ const Admin = () => {
               <CardContent className="p-4">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Last Updated: {new Date().toLocaleDateString()}</span>
+                  <span className="text-sm font-medium">Updated: {new Date().toLocaleDateString()}</span>
                 </div>
               </CardContent>
             </Card>
@@ -321,7 +276,7 @@ const Admin = () => {
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="rules" className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
-                State Rules
+                Enhanced State Rules
               </TabsTrigger>
               <TabsTrigger value="templates" className="flex items-center gap-2">
                 <Database className="h-4 w-4" />
@@ -334,7 +289,7 @@ const Admin = () => {
             </TabsList>
 
             <TabsContent value="rules" className="space-y-6">
-              <StateRuleManager
+              <EnhancedStateRuleManager
                 stateRules={stateRules}
                 onAddRule={addStateRule}
                 onDeleteRule={deleteRule}
