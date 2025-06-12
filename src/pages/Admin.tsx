@@ -9,7 +9,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Settings, Database, FileText, Plus, Edit, Trash } from 'lucide-react';
+import { Settings, Database, FileText, Plus, Edit, Trash, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const US_STATES = [
   'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware',
@@ -158,9 +159,17 @@ const Admin = () => {
       <div className="min-h-screen bg-background">
         <div className="container mx-auto py-8">
           <div className="flex justify-between items-center mb-8">
-            <div className="text-center flex-1">
-              <h1 className="text-4xl font-bold mb-4">Coastal Claims Admin</h1>
-              <p className="text-xl text-muted-foreground">Manage Compliance Rules & AI Templates</p>
+            <div className="flex items-center gap-4">
+              <Link to="/">
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to AI
+                </Button>
+              </Link>
+              <div className="text-center">
+                <h1 className="text-4xl font-bold mb-4">Coastal Claims Admin</h1>
+                <p className="text-xl text-muted-foreground">Manage Compliance Rules & AI Templates</p>
+              </div>
             </div>
             <ThemeToggle />
           </div>
