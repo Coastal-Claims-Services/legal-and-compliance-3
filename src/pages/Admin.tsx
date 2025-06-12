@@ -152,7 +152,13 @@ const Admin = () => {
     setIsSourceModalOpen(false);
   };
 
-  const unresolvedAlerts = complianceAlerts.filter(alert => !alert.resolved);
+  // Filter alerts by selected state - NO MIXING STATES
+  const filteredAlerts = selectedState === 'all' 
+    ? complianceAlerts 
+    : complianceAlerts.filter(alert => alert.state === selectedState);
+  
+  const unresolvedFilteredAlerts = filteredAlerts.filter(alert => !alert.resolved);
+  
   const highConfidenceRules = stateRules.filter(rule => rule.confidence === 'HIGH').length;
   const rulesWithTests = stateRules.filter(rule => rule.tests.length > 0).length;
   const expiringSoonRules = stateRules.filter(rule => {
@@ -181,27 +187,27 @@ const Admin = () => {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              {unresolvedAlerts.length > 0 && (
+              {unresolvedFilteredAlerts.length > 0 && (
                 <Badge variant="destructive" className="flex items-center gap-1">
                   <AlertTriangle className="h-3 w-3" />
-                  {unresolvedAlerts.length} Alerts
+                  {unresolvedFilteredAlerts.length} {selectedState !== 'all' && `${selectedState} `}Alerts
                 </Badge>
               )}
               <ThemeToggle />
             </div>
           </div>
 
-          {unresolvedAlerts.length > 0 && (
+          {unresolvedFilteredAlerts.length > 0 && (
             <Card className="mb-6 border-destructive/50 bg-destructive/5 dark:bg-destructive/10">
               <CardHeader>
                 <CardTitle className="text-destructive flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5" />
-                  Compliance Alerts
+                  Compliance Alerts {selectedState !== 'all' && `- ${selectedState} Only`}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {unresolvedAlerts.slice(0, 3).map((alert) => (
+                  {unresolvedFilteredAlerts.slice(0, 3).map((alert) => (
                     <div key={alert.id} className="flex items-center justify-between p-4 bg-background rounded-lg border border-destructive/20">
                       <div className="flex items-center gap-3 flex-1">
                         <Badge variant={alert.priority === 'High' ? 'destructive' : 'secondary'}>
