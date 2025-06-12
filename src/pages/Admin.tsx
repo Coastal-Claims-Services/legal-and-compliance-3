@@ -181,6 +181,12 @@ const Admin = () => {
                   Back to AI
                 </Button>
               </Link>
+              <Link to="/states">
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <list className="h-4 w-4" />
+                  All States
+                </Button>
+              </Link>
               <div>
                 <h1 className="text-4xl font-bold mb-2">Coastal Claims Admin</h1>
                 <p className="text-xl text-muted-foreground">Enhanced Compliance Rules & AI Management System</p>
