@@ -1,0 +1,202 @@
+################################################################################
+#  ALASKA  PUBLIC‑ADJUSTER & PROPERTY‑CLAIM RULE SET   –  AK.v0.9
+#  scope: residential & commercial property • compiled: 2025‑06‑13
+################################################################################
+
+# 1 ▪ LICENSING & $10 000 BOND
+- state: AK
+  rule_id: AK-PUBADJ-LIC-001
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: STATUTE
+  confidence: HIGH
+  sunset: null
+  text: |
+    A public adjuster must hold an adjuster license under AS 21.27.010 et seq.
+    The licensee shall maintain a **$10 000 surety bond** payable to the state
+    for the life of the license.  (AS 21.27.250(a)(3)).
+  sources:
+    - AS 21.27.250(a)(3) 
+  tests:
+    - given: { licensed: false } expect: FAIL
+    - given: { bond_amount: 5000 } expect: FAIL
+    - given: { licensed: true, bond_amount: 10000 } expect: PASS
+
+# 2 ▪ COMPENSATION — "REASONABLE" RULE
+- state: AK
+  rule_id: AK-PUBADJ-FEES-002
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: STATUTE
+  confidence: MEDIUM           # statute silent on cap
+  sunset: null
+  text: |
+    Alaska sets **no numeric fee cap.**  AS 21.27.350(b) requires that all
+    compensation be "reasonable" and fully disclosed in the written contract.
+  sources:
+    - AS 21.27.350(b) 
+  tests:
+    - given: { fee_reasonable: false } expect: FAIL
+    - given: { fee_pct: 20, disclosed: true } expect: PASS
+
+# 3 ▪ CONTRACT & 3‑DAY RESCISSION
+- state: AK
+  rule_id: AK-PUBADJ-CONTRACT-003
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: STATUTE
+  confidence: HIGH
+  sunset: null
+  text: |
+    • Public‑adjuster contract must be in writing, state the fee basis, and
+      provide a **3‑business‑day rescission right** for the insured.
+      (AS 21.27.350(a)‑(f)).  
+    • Duplicate originals: one to the client, one retained by the PA for 5 yrs.
+  sources:
+    - AS 21.27.350(a)‑(f) 
+  tests:
+    - given: { rescission_days: 2, cancel_request: true } expect: FULL_REFUND
+    - given: { rescission_days: 4, cancel_request: true } expect: STANDARD_TERMS
+
+# 4 ▪ RECORD RETENTION
+- state: AK
+  rule_id: AK-PUBADJ-REC-004
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: STATUTE
+  confidence: HIGH
+  sunset: null
+  text: |
+    Keep every claim‑related document for at least **5 years** and make files
+    available to the Division of Insurance on request. (AS 21.27.350(g)).
+  sources:
+    - AS 21.27.350(g) 
+  tests:
+    - given: { retention_years: 4 } expect: FAIL
+    - given: { retention_years: 6 } expect: PASS
+
+# 5 ▪ 15‑WORK‑DAY ACKNOWLEDGEMENT
+- state: AK
+  rule_id: AK-CARRIER-ACK-005
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: REG
+  confidence: HIGH
+  sunset: null
+  text: |
+    Insurer must acknowledge notice of a claim and supply forms **within
+    15 working days**. (3 AAC 26.070(a)(1)‑(2)).
+  sources:
+    - 3 AAC 26.070(a) 
+  tests:
+    - given: { ack_days: 17 } expect: FAIL
+    - given: { ack_days: 10 } expect: PASS
+
+# 6 ▪ 30‑WORK‑DAY ACCEPT / DENY
+- state: AK
+  rule_id: AK-CARRIER-DECISION-006
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: REG
+  confidence: HIGH
+  sunset: null
+  text: |
+    Insurer must affirm or deny liability **within 30 working days** after
+    receiving a completed proof‑of‑loss, unless the delay is documented and
+    justified in the file. (3 AAC 26.070(a)(3)).
+  sources:
+    - 3 AAC 26.070(a)(3) 
+  tests:
+    - given: { days_since_pol: 35, delay_doc: false } expect: FAIL
+    - given: { days_since_pol: 25 } expect: PASS
+
+# 7 ▪ 30‑DAY PAYMENT AFTER ACCEPTANCE
+- state: AK
+  rule_id: AK-CARRIER-PAY-007
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: REG
+  confidence: HIGH
+  sunset: null
+  text: |
+    Once liability and amount are agreed, the insurer shall pay **within
+    30 days** or be subject to interest under AS 21.36.125(b).
+    (3 AAC 26.070(a)(4)).
+  sources:
+    - 3 AAC 26.070(a)(4) 
+  tests:
+    - given: { days_since_agree: 32 } expect: FAIL
+    - given: { days_since_agree: 20 } expect: PASS
+
+# 8 ▪ MATCHING REGULATION
+- state: AK
+  rule_id: AK-PROP-MATCH-008
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: REG
+  confidence: HIGH
+  sunset: null
+  text: |
+    If replacement parts do not match in quality, color, or size, insurer must
+    replace all such property required to create a reasonably uniform
+    appearance.  (3 AAC 26.090(l)).
+  sources:
+    - 3 AAC 26.090(l) 
+  tests:
+    - given: { match: false } expect: FULL_AREA_REPLACE
+    - given: { match: true }  expect: PATCH_OK
+
+# 9 ▪ BAD‑FAITH TORT
+- state: AK
+  rule_id: AK-LAW-BADFAITH-009
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: CASE
+  confidence: HIGH
+  sunset: null
+  text: |
+    Alaska recognizes a first‑party bad‑faith tort (see *State Farm Fire v.
+    Nicholson*, 777 P.2d 1152 (Alaska 1989)).  Plaintiff must show:
+      1️⃣ No reasonable basis for denial or delay, and  
+      2️⃣ Insurer knew or recklessly disregarded that fact.  
+    Punitive damages may be awarded on clear‑and‑convincing evidence of
+    reckless indifference.
+  sources:
+    - *State Farm Fire v. Nicholson*, 777 P.2d 1152 (Alaska 1989) 
+  tests:
+    - given: { no_reasonable_basis: true, knowledge: true } expect: BAD_FAITH_OK
+    - given: { no_reasonable_basis: false } expect: NO_BAD_FAITH
+
+# 10 ▪ SUIT LIMITATION PERIOD
+- state: AK
+  rule_id: AK-LAW-SOL-010
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: STATUTE
+  confidence: MEDIUM
+  sunset: null
+  text: |
+    Written‑contract actions must be filed **within 3 years** of accrual.
+    (AS 09.10.053).  Alaska courts generally bar policy clauses that shorten
+    this period.
+  sources:
+    - AS 09.10.053 
+  tests:
+    - given: { years_since_dol: 4 } expect: FAIL
+    - given: { years_since_dol: 2 } expect: PASS
+
+# 11 ▪ DOI CONTACT INFO
+- state: AK
+  rule_id: AK-RES-DOI-011
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: AGENCY
+  confidence: HIGH
+  sunset: null
+  text: |
+    Alaska Division of Insurance, Dept. of Commerce, Community & Economic Dev.  
+    550 W. 7th Ave. Suite 1560, Anchorage AK 99501‑3597  
+    Phone (907) 269‑7900 | Email insurance@alaska.gov
+  sources:
+    - DOI contact page 
+  tests: []
