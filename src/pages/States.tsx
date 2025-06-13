@@ -171,7 +171,14 @@ const States = () => {
             {filteredStates.map((state) => {
               const stateData = getStateData(state);
               return (
-                <Card key={state} className="hover:shadow-lg transition-shadow">
+                <Card key={state} className={`hover:shadow-lg transition-shadow ${state === 'Alabama' ? 'relative' : ''}`}>
+                  {state === 'Alabama' && (
+                    <div className="absolute inset-0 z-10 pointer-events-none">
+                      <div className="w-full h-full relative">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-red-500 origin-top-left transform rotate-[26deg] translate-y-[140px]"></div>
+                      </div>
+                    </div>
+                  )}
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="flex items-center gap-2">
