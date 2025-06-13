@@ -1,0 +1,204 @@
+################################################################################
+#  GEORGIA  PUBLIC‑ADJUSTER & PROPERTY‑CLAIM RULE SET   –  GA.v0.9
+#  scope: res. & comm. property            •   compiled: 2025‑06‑13
+################################################################################
+
+# 1 ▪ LICENSING & $5 000 BOND
+- state: GA
+  rule_id: GA-PUBADJ-LIC-001
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: REG          # bond amount fixed by rule 120‑2‑3‑.18
+  confidence: HIGH
+  sunset: null
+  text: |
+    A public adjuster must hold a license under O.C.G.A. § 33‑23‑1 et seq.
+    Resident licensees shall post a **$5 000 surety bond** and keep it in force
+    for the life of the license.  (Ga. Comp. R. & Regs. 120‑2‑3‑.18).
+  sources:
+    - Rule 120‑2‑3‑.18
+    - § 33‑23‑6 O.C.G.A.
+  tests:
+    - given: { licensed: false } expect: FAIL
+    - given: { bond_amount: 3000 } expect: FAIL
+    - given: { licensed: true, bond_amount: 5000 } expect: PASS
+
+# 2 ▪ CONTRACT ‑ PRE‑APPROVAL & 3‑DAY RESCISSION
+- state: GA
+  rule_id: GA-PUBADJ-CONTRACT-002
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: STATUTE
+  confidence: HIGH
+  sunset: null
+  text: |
+    • Use only a contract form **approved by the Commissioner** before use.  
+    • Required terms: fee basis, "WE REPRESENT THE INSURED ONLY" header,
+      3‑business‑day rescission right, no conflicts, duplicate originals, etc.
+      (See full list in § 33‑23‑43.2(b)).  
+    • Insured may rescind within 3 business days by written/e‑mail notice.
+  sources:
+    - § 33‑23‑43.2 O.C.G.A.
+  tests:
+    - given: { contract_approved: false } expect: FAIL
+    - given: { rescission_days: 2, cancel_request: true } expect: FULL_REFUND
+
+# 3 ▪ FEE CAP 33 ⅓ %
+- state: GA
+  rule_id: GA-PUBADJ-FEES-003
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: STATUTE
+  confidence: HIGH
+  sunset: null
+  text: |
+    Total compensation (hourly, flat, percentage) must be **reasonable** and
+    may **not exceed 33.3 %** of the insurance settlement. (§ 33‑23‑43.3).
+  sources:
+    - § 33‑23‑43.3 O.C.G.A.
+  tests:
+    - given: { fee_pct: 35 } expect: FAIL
+    - given: { fee_pct: 25 } expect: PASS
+
+# 4 ▪ SOLICITATION HOURS & DISASTER COOL‑OFF
+- state: GA
+  rule_id: GA-PUBADJ-SOLICIT-004
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: STATUTE
+  confidence: HIGH
+  sunset: null
+  text: |
+    • No solicitation during a declared natural‑disaster event while the
+      disaster is "in progress." (§ 33‑23‑43.8(a)).  
+    • Otherwise, solicit only **8 a.m.–10 p.m. Mon‑Sat** and **noon–10 p.m.
+      Sun**. (§ 33‑23‑43.8(b)).
+  sources:
+    - § 33‑23‑43.8 O.C.G.A.
+  tests:
+    - given: { day: "Sunday", hour: "09:00", solicitation: true } expect: FAIL
+    - given: { disaster_in_progress: true, solicitation: true } expect: FAIL
+    - given: { day: "Wednesday", hour: "21:00" } expect: PASS
+
+# 5 ▪ PA RECORD RETENTION (ADVISORY)
+- state: GA
+  rule_id: GA-PUBADJ-REC-005
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: ADVISORY
+  confidence: LOW
+  sunset: 2026-12-31
+  text: |
+    Georgia statute is silent. Follow NAIC Model #228 § 18: keep claim files
+    **≥ 5 years** after closure and make them available to OCI on request.
+  sources:
+    - NAIC Model #228 § 18
+  tests:
+    - given: { retention_years: 4 } expect: FAIL
+    - given: { retention_years: 6 } expect: PASS
+
+# 6 ▪ 15‑DAY ACKNOWLEDGEMENT
+- state: GA
+  rule_id: GA-CARRIER-ACK-006
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: REG
+  confidence: HIGH
+  sunset: null
+  text: |
+    Insurer must acknowledge notice of claim and supply proof‑of‑loss forms
+    **within 15 calendar days**. (Ga. Comp. R. & Regs. 120‑2‑52‑.03).
+  sources:
+    - Rule 120‑2‑52‑.03
+  tests:
+    - given: { ack_days: 17 } expect: FAIL
+    - given: { ack_days: 10 } expect: PASS
+
+# 7 ▪ 60‑DAY ACCEPT / DENY
+- state: GA
+  rule_id: GA-CARRIER-DECISION-007
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: REG
+  confidence: HIGH
+  sunset: null
+  text: |
+    For fire or extended‑coverage property claims, insurer must affirm or deny
+    liability **within 60 days** after receiving a completed proof‑of‑loss,
+    unless missing info is documented in the file. (Rule 120‑2‑52‑.03(3)).
+  sources:
+    - Rule 120‑2‑52‑.03(3)
+  tests:
+    - given: { days_since_pol: 65, info_missing: false } expect: FAIL
+    - given: { days_since_pol: 30 } expect: PASS
+
+# 8 ▪ BAD‑FAITH PENALTY & FEE SHIFT
+- state: GA
+  rule_id: GA-LAW-BADFAITH-008
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: STATUTE
+  confidence: HIGH
+  sunset: null
+  text: |
+    If insurer refuses to pay **within 60 days of demand** and that refusal is
+    found in bad faith, it owes the loss **+ up to 50 % (or $5 000) penalty
+    + all reasonable attorney fees**. (§ 33‑4‑6).
+  sources:
+    - § 33‑4‑6 O.C.G.A.
+  tests:
+    - given: { days_since_demand: 70, bad_faith: true } expect: FEES_AND_PENALTY
+    - given: { bad_faith: false } expect: NO_PENALTY
+
+# 9 ▪ MATCHING—NO STATUTE OR REG
+- state: GA
+  rule_id: GA-PROP-MATCH-009
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: ADVISORY
+  confidence: LOW
+  sunset: 2027-06-30
+  text: |
+    Georgia has **no statute, regulation, or published case** mandating
+    full‑area replacement for cosmetic mismatches.  Policy language controls.
+    Adjusters should frame the argument around "like kind & quality" and
+    valuation provisions.
+  sources:
+    - PropertyCasualty360 matching chart (2024)
+  tests:
+    - given: { match: false } expect: POLICY_GOVERNS
+
+# 10 ▪ 6‑YEAR SUIT LIMIT — POLICY MAY SHORTEN
+- state: GA
+  rule_id: GA-LAW-SOL-010
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: STATUTE
+  confidence: MEDIUM
+  sunset: null
+  text: |
+    Written‑contract actions must be filed **within 6 years** (O.C.G.A.
+    § 9‑3‑24).  Georgia courts allow property policies to shorten this period
+    (e.g., 1 year) if the clause is clear and not forbidden by other law.
+  sources:
+    - § 9‑3‑24 O.C.G.A.
+    - case note: _Property Ins. Coverage Law_ blog (2022)
+  tests:
+    - given: { years_since_dol: 7, policy_sol_years: 6 } expect: FAIL
+    - given: { years_since_dol: 2, policy_sol_years: 1 } expect: FAIL
+
+# 11 ▪ OCI CONTACT INFO
+- state: GA
+  rule_id: GA-RES-DOI-011
+  version: 0.9
+  last_updated: 2025-06-13
+  authority_level: AGENCY
+  confidence: HIGH
+  sunset: null
+  text: |
+    Office of Commissioner of Insurance & Safety Fire (OCI)  
+    2 Martin Luther King Jr. Dr. SW, West Tower Suite 702  
+    Atlanta GA 30334 · (404) 656‑2070 · Toll‑free (800) 656‑2298
+  sources:
+    - OCI contact page
+  tests: []

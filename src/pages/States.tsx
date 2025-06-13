@@ -55,6 +55,13 @@ const STATE_DATA = {
     lastUpdated: '2024-01-05',
     status: 'active',
     compliance: 'good'
+  },
+  'Georgia': {
+    rules: 11,
+    alerts: 0,
+    lastUpdated: '2025-06-13',
+    status: 'active',
+    compliance: 'good'
   }
 };
 
