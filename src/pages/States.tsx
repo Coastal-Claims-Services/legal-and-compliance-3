@@ -62,6 +62,13 @@ const STATE_DATA = {
     lastUpdated: '2025-06-13',
     status: 'active',
     compliance: 'good'
+  },
+  'Alabama': {
+    rules: 8,
+    alerts: 1,
+    lastUpdated: '2025-06-13',
+    status: 'active',
+    compliance: 'warning'
   }
 };
 
