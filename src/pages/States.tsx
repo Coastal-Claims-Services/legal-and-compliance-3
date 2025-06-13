@@ -171,7 +171,7 @@ const States = () => {
             {filteredStates.map((state) => {
               const stateData = getStateData(state);
               return (
-                <Card key={state} className="hover:shadow-lg transition-shadow">
+                <Card key={state} className={`hover:shadow-lg transition-shadow ${state === 'Alabama' ? 'opacity-50 bg-muted/30' : ''}`}>
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="flex items-center gap-2">
@@ -215,6 +215,7 @@ const States = () => {
                         size="sm" 
                         className="flex-1 flex items-center gap-2"
                         onClick={() => handleProtectedAction('rules', state)}
+                        disabled={state === 'Alabama'}
                       >
                         <FileText className="h-3 w-3" />
                         Manage Rules
@@ -224,6 +225,7 @@ const States = () => {
                         size="sm" 
                         className="flex-1 flex items-center gap-2"
                         onClick={() => handleProtectedAction('configure', state)}
+                        disabled={state === 'Alabama'}
                       >
                         <Settings className="h-3 w-3" />
                         Configure
