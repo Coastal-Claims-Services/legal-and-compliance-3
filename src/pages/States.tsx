@@ -29,11 +29,11 @@ const STATE_DATA = {
     compliance: 'good'
   },
   'Florida': {
-    rules: 18,
+    rules: 19,
     alerts: 1,
-    lastUpdated: '2024-01-08',
+    lastUpdated: '2025-06-13',
     status: 'active',
-    compliance: 'warning'
+    compliance: 'good'
   },
   'Texas': {
     rules: 0,
