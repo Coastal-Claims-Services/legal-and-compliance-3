@@ -119,9 +119,9 @@ const States = () => {
   const handlePinSuccess = () => {
     if (pendingAction) {
       if (pendingAction.type === 'rules') {
-        navigate(`/admin?state=${pendingAction.state}`);
+        navigate(`/admin/details?state=${pendingAction.state}`);
       } else {
-        navigate(`/admin?state=${pendingAction.state}&tab=settings`);
+        navigate(`/admin/details?state=${pendingAction.state}&tab=settings`);
       }
     }
     setShowPinDialog(false);
