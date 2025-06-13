@@ -35,6 +35,13 @@ const STATE_DATA = {
     status: 'active',
     compliance: 'good'
   },
+  'Hawaii': {
+    rules: 8,
+    alerts: 0,
+    lastUpdated: '2025-06-13',
+    status: 'active',
+    compliance: 'good'
+  },
   'Texas': {
     rules: 0,
     alerts: 0,
