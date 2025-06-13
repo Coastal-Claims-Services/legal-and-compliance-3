@@ -43,11 +43,11 @@ const STATE_DATA = {
     compliance: 'good'
   },
   'Texas': {
-    rules: 0,
+    rules: 12,
     alerts: 0,
-    lastUpdated: null,
-    status: 'inactive',
-    compliance: 'none'
+    lastUpdated: '2025-06-13',
+    status: 'active',
+    compliance: 'good'
   },
   'California': {
     rules: 12,

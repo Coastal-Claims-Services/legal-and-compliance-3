@@ -1,0 +1,211 @@
+import { StateRule } from '../types/admin';
+
+export const texasRules: StateRule[] = [
+  {
+    id: 'TX-PUBADJ-LIC-001',
+    state: 'Texas',
+    rule_id: 'TX-PUBADJ-LIC-001',
+    version: '0.9',
+    last_updated: '2025-06-13',
+    authority_level: 'STATUTE',
+    confidence: 'HIGH',
+    category: 'Public Adjuster Compliance',
+    subcategory: 'License Requirements',
+    text: 'A public adjuster must hold a license under Chapter 4102. The licensee shall maintain a **$10 000 surety bond** for the life of the license. (§ 4102.105; TDI bond form).',
+    sources: ['§ 4102.105 Tex. Ins. Code', 'NFP bond page'],
+    tests: [
+      { given: { licensed: false }, expect: 'FAIL' },
+      { given: { bond_amount: 8000 }, expect: 'FAIL' },
+      { given: { licensed: true, bond_amount: 10000 }, expect: 'PASS' }
+    ]
+  },
+  {
+    id: 'TX-PUBADJ-FEES-002',
+    state: 'Texas',
+    rule_id: 'TX-PUBADJ-FEES-002',
+    version: '0.9',
+    last_updated: '2025-06-13',
+    authority_level: 'STATUTE',
+    confidence: 'HIGH',
+    category: 'Public Adjuster Compliance',
+    subcategory: 'Fee Caps & Structures',
+    text: '• Total compensation may **not exceed 10 %** of the insurance settlement. (§ 4102.104(a)). • If the insurer pays or commits to pay policy limits within **72 hours** of first notice, the PA may charge **reasonable time‑based fees only**. (§ 4102.104(b)).',
+    sources: ['§ 4102.104 Tex. Ins. Code'],
+    tests: [
+      { given: { fee_pct: 12 }, expect: 'FAIL' },
+      { given: { fee_pct: 9 }, expect: 'PASS' },
+      { given: { policy_limits_paid_hrs: 48, fee_type: 'percent' }, expect: 'FAIL' }
+    ]
+  },
+  {
+    id: 'TX-PUBADJ-CONTRACT-003',
+    state: 'Texas',
+    rule_id: 'TX-PUBADJ-CONTRACT-003',
+    version: '0.9',
+    last_updated: '2025-06-13',
+    authority_level: 'STATUTE',
+    confidence: 'HIGH',
+    category: 'Public Adjuster Compliance',
+    subcategory: 'Contract Requirements',
+    text: '• Must use a contract **approved by TDI** (§ 4102.103(a)). • Contract must allow the insured to **cancel within 72 hrs** by written notice and display "WE REPRESENT THE INSURED ONLY." (§ 4102.103(b)). • Keep a signed duplicate on file in Texas (§ 4102.103(c)).',
+    sources: ['§ 4102.103 Tex. Ins. Code'],
+    tests: [
+      { given: { contract_approved: false }, expect: 'FAIL' },
+      { given: { cancel_hrs: 48, cancel_request: true }, expect: 'FULL_REFUND' },
+      { given: { cancel_hrs: 80, cancel_request: true }, expect: 'STANDARD_TERMS' }
+    ]
+  },
+  {
+    id: 'TX-PUBADJ-SOLICIT-004',
+    state: 'Texas',
+    rule_id: 'TX-PUBADJ-SOLICIT-004',
+    version: '0.9',
+    last_updated: '2025-06-13',
+    authority_level: 'STATUTE',
+    confidence: 'HIGH',
+    category: 'Public Adjuster Compliance',
+    subcategory: 'Contact Restrictions',
+    text: '• **No solicitation during the progress of a natural‑disaster loss** (§ 4102.151). • Otherwise, permitted hours are **9 a.m.–9 p.m. Mon‑Sat** and **noon–9 p.m. Sun** (§ 4102.152).',
+    sources: ['§ 4102.151‑.152 Tex. Ins. Code'],
+    tests: [
+      { given: { disaster_in_progress: true, solicitation: true }, expect: 'FAIL' },
+      { given: { day: 'Sunday', hour: '10:00' }, expect: 'FAIL' },
+      { given: { day: 'Tuesday', hour: '20:00' }, expect: 'PASS' }
+    ]
+  },
+  {
+    id: 'TX-PUBADJ-REC-005',
+    state: 'Texas',
+    rule_id: 'TX-PUBADJ-REC-005',
+    version: '0.9',
+    last_updated: '2025-06-13',
+    authority_level: 'ADVISORY',
+    confidence: 'LOW',
+    sunset: '2026-12-31',
+    category: 'Public Adjuster Compliance',
+    subcategory: 'Record Keeping',
+    text: 'Texas law is silent. Follow NAIC Model #228 § 18: keep claim files **≥ 5 years** after closure; make available to TDI on request.',
+    sources: ['NAIC Model #228 § 18'],
+    tests: [
+      { given: { retention_years: 4 }, expect: 'FAIL' },
+      { given: { retention_years: 6 }, expect: 'PASS' }
+    ]
+  },
+  {
+    id: 'TX-CARRIER-PPP-006',
+    state: 'Texas',
+    rule_id: 'TX-CARRIER-PPP-006',
+    version: '0.9',
+    last_updated: '2025-06-13',
+    authority_level: 'STATUTE',
+    confidence: 'HIGH',
+    category: 'Insurance Carrier Obligations',
+    subcategory: 'Response Timeframes',
+    text: '**Prompt Payment Act (Ch. 542):** • Acknowledge & begin investigation **within 15 days** (§ 542.055(a)). • Accept or deny within 15 bus. days of getting all requested items; may extend once **45 days** with written reason (§ 542.056, .058). • Pay accepted sums **within 5 bus. days** of notice (§ 542.057).',
+    sources: ['§ 542.055‑.058 Tex. Ins. Code'],
+    tests: [
+      { given: { ack_days: 20 }, expect: 'FAIL' },
+      { given: { decision_days: 50, extension: false }, expect: 'FAIL' },
+      { given: { pay_days: 7 }, expect: 'FAIL' },
+      { given: { ack_days: 10, decision_days: 12, pay_days: 3 }, expect: 'PASS' }
+    ]
+  },
+  {
+    id: 'TX-LAW-PROMPTPAY-007',
+    state: 'Texas',
+    rule_id: 'TX-LAW-PROMPTPAY-007',
+    version: '0.9',
+    last_updated: '2025-06-13',
+    authority_level: 'STATUTE',
+    confidence: 'HIGH',
+    category: 'Legal Framework',
+    subcategory: 'Fee-Shifting Statutes',
+    text: 'Violation of Ch. 542 makes the insurer liable for **18 % simple interest** per year on the unpaid amount **plus reasonable attorney fees**. (§ 542.060). In § 542A cases, rate = 5 % + post‑judgment rate.',
+    sources: ['§ 542.060 Tex. Ins. Code'],
+    tests: [
+      { given: { ppp_violation: true }, expect: 'INTEREST_18_PLUS_FEES' }
+    ]
+  },
+  {
+    id: 'TX-LAW-BADFAITH-008',
+    state: 'Texas',
+    rule_id: 'TX-LAW-BADFAITH-008',
+    version: '0.9',
+    last_updated: '2025-06-13',
+    authority_level: 'STATUTE',
+    confidence: 'HIGH',
+    category: 'Legal Framework',
+    subcategory: 'Bad Faith Standards',
+    text: 'Under Ch. 541 a claimant may recover **actual damages** + court costs + attorney fees. If the insurer **knowingly** violated the chapter, the court may award up to **3× actual damages**. (§ 541.152).',
+    sources: ['§ 541.152 Tex. Ins. Code'],
+    tests: [
+      { given: { knowing: true }, expect: 'TREBLE_OK' },
+      { given: { knowing: false }, expect: 'SINGLE_DAMAGE' }
+    ]
+  },
+  {
+    id: 'TX-PROP-MATCH-009',
+    state: 'Texas',
+    rule_id: 'TX-PROP-MATCH-009',
+    version: '0.9',
+    last_updated: '2025-06-13',
+    authority_level: 'ADVISORY',
+    confidence: 'LOW',
+    sunset: '2027-06-30',
+    category: 'Construction Standards',
+    subcategory: 'Matching Requirements',
+    text: 'Texas has **no matching statute or regulation**. Policy language controls. Adjusters may cite RCV intent and *contra proferentem* where wording is ambiguous.',
+    sources: ['MWL survey (2019)'],
+    tests: [
+      { given: { match: false }, expect: 'POLICY_GOVERNS' }
+    ]
+  },
+  {
+    id: 'TX-PROP-NOI-010',
+    state: 'Texas',
+    rule_id: 'TX-PROP-NOI-010',
+    version: '0.9',
+    last_updated: '2025-06-13',
+    authority_level: 'STATUTE',
+    confidence: 'HIGH',
+    category: 'Legal Framework',
+    subcategory: 'Court Procedures',
+    text: 'For first‑party property claims due to **acts of nature**, claimant must give written notice **≥ 61 days** before filing suit. (§ 542A.003).',
+    sources: ['§ 542A.003 Tex. Ins. Code'],
+    tests: [
+      { given: { days_before_suit: 45 }, expect: 'FAIL' },
+      { given: { days_before_suit: 70 }, expect: 'PASS' }
+    ]
+  },
+  {
+    id: 'TX-LAW-SOL-011',
+    state: 'Texas',
+    rule_id: 'TX-LAW-SOL-011',
+    version: '0.9',
+    last_updated: '2025-06-13',
+    authority_level: 'STATUTE',
+    confidence: 'MEDIUM',
+    category: 'Legal Framework',
+    subcategory: 'Statute of Limitations',
+    text: '• Contract actions: default **4 yrs** (Civ. Prac. & Rem. § 16.004). • Policies may shorten to **2 yrs & 1 day** (§ 16.070) if clear. • Ch. 541 statutory actions: **2 yrs** from violation/discovery.',
+    sources: ['§ 16.004 Tex. Civ. Prac. & Rem. Code', '§ 16.070 Tex. Civ. Prac. & Rem. Code'],
+    tests: [
+      { given: { years_since_dol: 5 }, expect: 'FAIL' },
+      { given: { years_since_dol: 1.5, policy_sol_years: 1 }, expect: 'FAIL' }
+    ]
+  },
+  {
+    id: 'TX-RES-TDI-012',
+    state: 'Texas',
+    rule_id: 'TX-RES-TDI-012',
+    version: '0.9',
+    last_updated: '2025-06-13',
+    authority_level: 'AGENCY',
+    confidence: 'HIGH',
+    category: 'Professional Resources',
+    subcategory: 'Regulatory Contacts',
+    text: 'Texas Department of Insurance (TDI) 1601 Congress Ave., Austin TX 78701 Consumer Help Line: (800) 252‑3439 | www.tdi.texas.gov',
+    sources: ['TDI public adjuster FAQ'],
+    tests: []
+  }
+];
