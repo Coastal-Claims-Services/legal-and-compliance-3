@@ -65,10 +65,10 @@ const STATE_DATA = {
   },
   'Alabama': {
     rules: 8,
-    alerts: 1,
+    alerts: 0,
     lastUpdated: '2025-06-13',
     status: 'inactive',
-    compliance: 'warning'
+    compliance: 'none'
   }
 };
 
