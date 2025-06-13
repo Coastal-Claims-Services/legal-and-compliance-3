@@ -95,10 +95,10 @@ const INITIAL_RESPONSE_TEMPLATES: ResponseTemplate[] = [
 
 const Admin = () => {
   const [searchParams] = useSearchParams();
-  const [stateRules, setStateRules] = useState<StateRule[]>(KENTUCKY_RULES);
+  const [stateRules, setStateRules] = useState<StateRule[]>([]);
   const [responseTemplates, setResponseTemplates] = useState<ResponseTemplate[]>(INITIAL_RESPONSE_TEMPLATES);
   const [complianceAlerts, setComplianceAlerts] = useState<ComplianceAlert[]>(INITIAL_COMPLIANCE_ALERTS);
-  const [selectedState, setSelectedState] = useState<string>('all');
+  const [selectedState, setSelectedState] = useState<string>('');
   const [activeTab, setActiveTab] = useState<string>('rules');
   const [newTemplate, setNewTemplate] = useState({
     category: '',
@@ -108,6 +108,16 @@ const Admin = () => {
   const [selectedAlert, setSelectedAlert] = useState<ComplianceAlert | null>(null);
   const [isSourceModalOpen, setIsSourceModalOpen] = useState(false);
 
+  // Load state rules based on selected state
+  const loadStateRules = (state: string) => {
+    if (state === 'Kentucky') {
+      setStateRules(KENTUCKY_RULES);
+    } else {
+      // For other states, start with empty rules - they can add their own
+      setStateRules([]);
+    }
+  };
+
   // Read state and tab from URL parameters
   useEffect(() => {
     const stateParam = searchParams.get('state');
@@ -115,6 +125,11 @@ const Admin = () => {
     
     if (stateParam && US_STATES.includes(stateParam)) {
       setSelectedState(stateParam);
+      loadStateRules(stateParam);
+    } else {
+      // Default to showing all states view
+      setSelectedState('all');
+      setStateRules(KENTUCKY_RULES); // Still show KY rules when viewing all
     }
     
     if (tabParam && ['rules', 'templates', 'settings'].includes(tabParam)) {
@@ -168,7 +183,17 @@ const Admin = () => {
     setIsSourceModalOpen(false);
   };
 
-  // Fix the filtering logic - when "all" is selected, show all alerts
+  // Handle state selection changes
+  const handleStateChange = (state: string) => {
+    setSelectedState(state);
+    if (state !== 'all') {
+      loadStateRules(state);
+    } else {
+      setStateRules(KENTUCKY_RULES); // Show KY rules when viewing all
+    }
+  };
+
+  // Fix the filtering logic - when "all" is selected, show all alerts  
   const filteredAlerts = selectedState === 'all' 
     ? complianceAlerts 
     : complianceAlerts.filter(alert => alert.state === selectedState);
@@ -310,7 +335,7 @@ const Admin = () => {
 
           <div className="mb-6">
             <Label htmlFor="state-filter">Filter by State</Label>
-            <Select value={selectedState} onValueChange={setSelectedState}>
+            <Select value={selectedState} onValueChange={handleStateChange}>
               <SelectTrigger className="w-64">
                 <SelectValue placeholder="All states..." />
               </SelectTrigger>
