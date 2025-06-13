@@ -185,7 +185,7 @@ export const EnhancedStateRuleManager: React.FC<EnhancedStateRuleManagerProps> =
                 id="rule_id"
                 value={newRule.rule_id}
                 onChange={(e) => setNewRule({...newRule, rule_id: e.target.value})}
-                placeholder="KY-PUBADJ-FEES-001"
+                placeholder={`${selectedState ? selectedState.substring(0,2).toUpperCase() : 'XX'}-PUBADJ-FEES-001`}
               />
             </div>
             <div>
