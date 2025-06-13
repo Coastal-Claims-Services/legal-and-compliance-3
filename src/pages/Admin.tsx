@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ThemeProvider } from '../components/theme-provider';
 import { ThemeToggle } from '../components/theme-toggle';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Settings, Database, FileText, Plus, Edit, Trash, ArrowLeft, AlertTriangle, Clock, List } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { EnhancedStateRuleManager } from '../components/EnhancedStateRuleManager';
 import { StateRule, ResponseTemplate, ComplianceAlert } from '../types/admin';
 import { KENTUCKY_RULES } from '../data/kentuckyRules';
@@ -94,10 +94,12 @@ const INITIAL_RESPONSE_TEMPLATES: ResponseTemplate[] = [
 ];
 
 const Admin = () => {
+  const [searchParams] = useSearchParams();
   const [stateRules, setStateRules] = useState<StateRule[]>(KENTUCKY_RULES);
   const [responseTemplates, setResponseTemplates] = useState<ResponseTemplate[]>(INITIAL_RESPONSE_TEMPLATES);
   const [complianceAlerts, setComplianceAlerts] = useState<ComplianceAlert[]>(INITIAL_COMPLIANCE_ALERTS);
   const [selectedState, setSelectedState] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState<string>('rules');
   const [newTemplate, setNewTemplate] = useState({
     category: '',
     template: '',
@@ -105,6 +107,20 @@ const Admin = () => {
   });
   const [selectedAlert, setSelectedAlert] = useState<ComplianceAlert | null>(null);
   const [isSourceModalOpen, setIsSourceModalOpen] = useState(false);
+
+  // Read state and tab from URL parameters
+  useEffect(() => {
+    const stateParam = searchParams.get('state');
+    const tabParam = searchParams.get('tab');
+    
+    if (stateParam && US_STATES.includes(stateParam)) {
+      setSelectedState(stateParam);
+    }
+    
+    if (tabParam && ['rules', 'templates', 'settings'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
 
   const addStateRule = (rule: StateRule) => {
     setStateRules([...stateRules, rule]);
@@ -309,7 +325,7 @@ const Admin = () => {
             </Select>
           </div>
 
-          <Tabs defaultValue="rules" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="rules" className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
