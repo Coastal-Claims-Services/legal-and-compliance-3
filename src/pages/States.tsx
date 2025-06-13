@@ -67,7 +67,7 @@ const STATE_DATA = {
     rules: 8,
     alerts: 1,
     lastUpdated: '2025-06-13',
-    status: 'active',
+    status: 'inactive',
     compliance: 'warning'
   }
 };
