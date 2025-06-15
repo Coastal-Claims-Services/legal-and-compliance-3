@@ -8,6 +8,7 @@ import Admin from "./pages/Admin";
 import States from "./pages/States";
 import Search from "./pages/Search";
 import Compare from "./pages/Compare";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -18,6 +19,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={<Navigate to="/states" replace />} />
           <Route path="/admin/details" element={<Admin />} />
           <Route path="/states" element={<States />} />
