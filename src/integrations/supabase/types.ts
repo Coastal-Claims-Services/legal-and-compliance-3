@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      conversation_history: {
+        Row: {
+          ai_response: string
+          created_at: string
+          id: string
+          silo: string
+          state: string
+          user_id: string | null
+          user_message: string
+        }
+        Insert: {
+          ai_response: string
+          created_at?: string
+          id?: string
+          silo: string
+          state: string
+          user_id?: string | null
+          user_message: string
+        }
+        Update: {
+          ai_response?: string
+          created_at?: string
+          id?: string
+          silo?: string
+          state?: string
+          user_id?: string | null
+          user_message?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -33,6 +63,54 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      state_rules: {
+        Row: {
+          category: string
+          confidence: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          last_updated: string
+          leverage_points: string[] | null
+          rule_text: string
+          silo: string
+          sources: string[] | null
+          state: string
+          subcategory: string | null
+          version: string | null
+        }
+        Insert: {
+          category: string
+          confidence?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_updated?: string
+          leverage_points?: string[] | null
+          rule_text: string
+          silo: string
+          sources?: string[] | null
+          state: string
+          subcategory?: string | null
+          version?: string | null
+        }
+        Update: {
+          category?: string
+          confidence?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_updated?: string
+          leverage_points?: string[] | null
+          rule_text?: string
+          silo?: string
+          sources?: string[] | null
+          state?: string
+          subcategory?: string | null
+          version?: string | null
         }
         Relationships: []
       }

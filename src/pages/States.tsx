@@ -1,260 +1,297 @@
-import React, { useState } from 'react';
-import { ThemeProvider } from '../components/theme-provider';
-import { ThemeToggle } from '../components/theme-toggle';
+import { useState, useEffect } from 'react';
+import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/AppSidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MapPin, AlertTriangle, FileText, Settings, Plus, Search } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import { PinProtection } from '../components/PinProtection';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Building2, Construction, Shield, Scale, MessageCircle, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { StateSiloChat } from '@/components/StateSiloChat';
 
-const US_STATES = [
-  'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware',
-  'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky',
-  'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi',
-  'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico',
-  'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania',
-  'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
-  'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
+const STATES = [
+  { code: 'AL', name: 'Alabama', status: 'prohibited' },
+  { code: 'FL', name: 'Florida', status: 'active' },
+  { code: 'TX', name: 'Texas', status: 'active' },
+  { code: 'GA', name: 'Georgia', status: 'active' },
+  { code: 'NC', name: 'North Carolina', status: 'pending' },
 ];
 
-// Mock data for demonstration - this would come from your backend
-const STATE_DATA = {
-  'Kentucky': {
-    rules: 23,
-    alerts: 2,
-    lastUpdated: '2024-01-10',
-    status: 'active',
-    compliance: 'good'
+const SILOS = [
+  {
+    id: 'public_adjusting',
+    name: 'Public Adjusting',
+    icon: Building2,
+    description: 'Laws & rules for public adjusters',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100'
   },
-  'Florida': {
-    rules: 19,
-    alerts: 1,
-    lastUpdated: '2025-06-13',
-    status: 'active',
-    compliance: 'good'
+  {
+    id: 'construction',
+    name: 'Construction',
+    icon: Construction,
+    description: 'Building codes & contractor leverage',
+    color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100'
   },
-  'Hawaii': {
-    rules: 8,
-    alerts: 0,
-    lastUpdated: '2025-06-13',
-    status: 'active',
-    compliance: 'good'
+  {
+    id: 'insurance_carrier',
+    name: 'Insurance Carrier',
+    icon: Shield,
+    description: 'Carrier obligations & breach detection',
+    color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
   },
-  'Texas': {
-    rules: 12,
-    alerts: 0,
-    lastUpdated: '2025-06-13',
-    status: 'active',
-    compliance: 'good'
-  },
-  'California': {
-    rules: 12,
-    alerts: 0,
-    lastUpdated: '2024-01-05',
-    status: 'active',
-    compliance: 'good'
-  },
-  'Georgia': {
-    rules: 11,
-    alerts: 0,
-    lastUpdated: '2025-06-13',
-    status: 'active',
-    compliance: 'good'
-  },
-  'Alabama': {
-    rules: 8,
-    alerts: 0,
-    lastUpdated: '2025-06-13',
-    status: 'inactive',
-    compliance: 'none'
+  {
+    id: 'legal',
+    name: 'Legal Resources',
+    icon: Scale,
+    description: 'Attorney resources & fee shifting',
+    color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
   }
-};
+];
+
+interface StateRule {
+  id: string;
+  state: string;
+  silo: string;
+  category: string;
+  subcategory: string;
+  rule_text: string;
+  leverage_points: string[];
+  sources: string[];
+  confidence: string;
+  is_active: boolean;
+}
 
 const States = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showPinDialog, setShowPinDialog] = useState(false);
-  const [pendingAction, setPendingAction] = useState<{ type: 'rules' | 'configure'; state: string } | null>(null);
-  const navigate = useNavigate();
+  const [selectedState, setSelectedState] = useState<string>('FL');
+  const [selectedSilo, setSelectedSilo] = useState<string>('public_adjusting');
+  const [stateRules, setStateRules] = useState<StateRule[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredStates = US_STATES.filter(state =>
-    state.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    fetchStateRules();
+  }, [selectedState]);
 
-  const getStateData = (state: string) => {
-    return STATE_DATA[state as keyof typeof STATE_DATA] || {
-      rules: 0,
-      alerts: 0,
-      lastUpdated: null,
-      status: 'inactive',
-      compliance: 'none'
-    };
+  const fetchStateRules = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('state_rules')
+      .select('*')
+      .eq('state', selectedState)
+      .eq('is_active', true)
+      .order('silo', { ascending: true })
+      .order('category', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching state rules:', error);
+    } else {
+      setStateRules(data || []);
+    }
+    setLoading(false);
   };
 
-  const getComplianceBadge = (compliance: string) => {
-    switch (compliance) {
-      case 'good':
-        return <Badge className="bg-green-100 text-green-800">Good</Badge>;
-      case 'warning':
-        return <Badge className="bg-yellow-100 text-yellow-800">Warning</Badge>;
-      case 'critical':
-        return <Badge className="bg-red-100 text-red-800">Critical</Badge>;
-      default:
-        return <Badge variant="outline">Not Configured</Badge>;
+  const getStateStatus = (stateCode: string) => {
+    const state = STATES.find(s => s.code === stateCode);
+    return state?.status || 'unknown';
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'active': return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'prohibited': return <XCircle className="h-4 w-4 text-red-600" />;
+      case 'pending': return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
+      default: return null;
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    return status === 'active' 
-      ? <Badge className="bg-blue-100 text-blue-800">Active</Badge>
-      : <Badge variant="outline">Inactive</Badge>;
-  };
-
-  const handleProtectedAction = (type: 'rules' | 'configure', state: string) => {
-    setPendingAction({ type, state });
-    setShowPinDialog(true);
-  };
-
-  const handlePinSuccess = () => {
-    if (pendingAction) {
-      if (pendingAction.type === 'rules') {
-        navigate(`/admin/details?state=${pendingAction.state}`);
-      } else {
-        navigate(`/admin/details?state=${pendingAction.state}&tab=settings`);
-      }
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'active': return 'Active - PA Licensed';
+      case 'prohibited': return 'Prohibited - No PA License';
+      case 'pending': return 'Pending - License Review';
+      default: return 'Unknown Status';
     }
-    setShowPinDialog(false);
-    setPendingAction(null);
   };
 
-  const handlePinClose = () => {
-    setShowPinDialog(false);
-    setPendingAction(null);
+  const getRulesForSilo = (siloId: string) => {
+    return stateRules.filter(rule => rule.silo === siloId);
   };
+
+  const selectedStateData = STATES.find(s => s.code === selectedState);
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="ui-theme">
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto py-8">
-          <div className="flex justify-between items-center mb-8">
-            <div className="flex items-center gap-4">
-              <Link to="/admin/details">
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <ArrowLeft className="h-4 w-4" />
-                  Admin Details
-                </Button>
-              </Link>
-              <div>
-                <h1 className="text-4xl font-bold mb-2">State Management</h1>
-                <p className="text-xl text-muted-foreground">Configure compliance rules for all states</p>
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-background">
+          <AppSidebar />
+          <main className="flex-1">
+            <div className="container mx-auto py-8">
+              <div className="flex justify-between items-center mb-8">
+                <div className="flex items-center gap-4">
+                  <SidebarTrigger />
+                  <div>
+                    <h1 className="text-4xl font-bold">State Legal Resources</h1>
+                    <p className="text-xl text-muted-foreground">4-Silo Knowledge Base per State</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <ThemeToggle />
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <ThemeToggle />
-            </div>
-          </div>
 
-          <div className="mb-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search states..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
+              {/* State Selection */}
+              <div className="mb-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <Select value={selectedState} onValueChange={setSelectedState}>
+                    <SelectTrigger className="w-64">
+                      <SelectValue placeholder="Select a state..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {STATES.map((state) => (
+                        <SelectItem key={state.code} value={state.code}>
+                          <div className="flex items-center gap-2">
+                            {getStatusIcon(state.status)}
+                            {state.name} ({state.code})
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  {selectedStateData && (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      {getStatusIcon(selectedStateData.status)}
+                      {getStatusText(selectedStateData.status)}
+                    </Badge>
+                  )}
+                </div>
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredStates.map((state) => {
-              const stateData = getStateData(state);
-              return (
-                <Card key={state} className={`hover:shadow-lg transition-shadow ${state === 'Alabama' ? 'opacity-50 bg-muted/30' : ''}`}>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2">
-                        <MapPin className="h-5 w-5 text-primary" />
-                        {state}
-                      </CardTitle>
-                      {getStatusBadge(stateData.status)}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">Rules:</span>
-                        <div className="font-semibold">{stateData.rules}</div>
+              {/* 4-Silo Tabs */}
+              <Tabs value={selectedSilo} onValueChange={setSelectedSilo} className="space-y-6">
+                <TabsList className="grid w-full grid-cols-4">
+                  {SILOS.map((silo) => {
+                    const Icon = silo.icon;
+                    const siloRules = getRulesForSilo(silo.id);
+                    return (
+                      <TabsTrigger key={silo.id} value={silo.id} className="flex items-center gap-2">
+                        <Icon className="h-4 w-4" />
+                        {silo.name}
+                        {siloRules.length > 0 && (
+                          <Badge variant="secondary" className="ml-1">
+                            {siloRules.length}
+                          </Badge>
+                        )}
+                      </TabsTrigger>
+                    );
+                  })}
+                </TabsList>
+
+                {SILOS.map((silo) => {
+                  const Icon = silo.icon;
+                  const siloRules = getRulesForSilo(silo.id);
+                  
+                  return (
+                    <TabsContent key={silo.id} value={silo.id} className="space-y-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Knowledge Base */}
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <Icon className="h-5 w-5" />
+                              {selectedStateData?.name} - {silo.name}
+                            </CardTitle>
+                            <p className="text-sm text-muted-foreground">{silo.description}</p>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            {loading ? (
+                              <div className="space-y-3">
+                                <div className="h-4 bg-muted rounded animate-pulse" />
+                                <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
+                                <div className="h-4 bg-muted rounded animate-pulse w-1/2" />
+                              </div>
+                            ) : siloRules.length > 0 ? (
+                              siloRules.map((rule) => (
+                                <div key={rule.id} className="border rounded-lg p-4 space-y-2">
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                      <h4 className="font-semibold text-sm">{rule.category}</h4>
+                                      {rule.subcategory && (
+                                        <p className="text-xs text-muted-foreground">{rule.subcategory}</p>
+                                      )}
+                                    </div>
+                                    <Badge className={silo.color}>
+                                      {rule.confidence}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-sm">{rule.rule_text}</p>
+                                  
+                                  {rule.leverage_points && rule.leverage_points.length > 0 && (
+                                    <div className="mt-2">
+                                      <p className="text-xs font-medium text-muted-foreground mb-1">Leverage Points:</p>
+                                      <ul className="list-disc list-inside text-xs space-y-1">
+                                        {rule.leverage_points.map((point, index) => (
+                                          <li key={index} className="text-muted-foreground">{point}</li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                                  
+                                  {rule.sources && rule.sources.length > 0 && (
+                                    <div className="mt-2">
+                                      <p className="text-xs font-medium text-muted-foreground">
+                                        Sources: {rule.sources.join(', ')}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              ))
+                            ) : (
+                              <div className="text-center py-8">
+                                <Icon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                                <p className="text-muted-foreground">
+                                  No {silo.name.toLowerCase()} rules available for {selectedStateData?.name}
+                                </p>
+                                <p className="text-sm text-muted-foreground mt-2">
+                                  Use the chat to ask questions and get AI-powered insights
+                                </p>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+
+                        {/* AI Chat */}
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <MessageCircle className="h-5 w-5" />
+                              Ask AI Assistant
+                            </CardTitle>
+                            <p className="text-sm text-muted-foreground">
+                              Get instant answers about {silo.name.toLowerCase()} in {selectedStateData?.name}
+                            </p>
+                          </CardHeader>
+                          <CardContent>
+                            <StateSiloChat 
+                              state={selectedState}
+                              silo={silo.id}
+                              siloName={silo.name}
+                              stateName={selectedStateData?.name || selectedState}
+                              rules={siloRules}
+                            />
+                          </CardContent>
+                        </Card>
                       </div>
-                      <div>
-                        <span className="text-muted-foreground">Alerts:</span>
-                        <div className="font-semibold flex items-center gap-1">
-                          {stateData.alerts}
-                          {stateData.alerts > 0 && (
-                            <AlertTriangle className="h-3 w-3 text-destructive" />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <span className="text-sm text-muted-foreground">Compliance Status:</span>
-                      <div className="mt-1">{getComplianceBadge(stateData.compliance)}</div>
-                    </div>
-
-                    {stateData.lastUpdated && (
-                      <div className="text-xs text-muted-foreground">
-                        Last updated: {new Date(stateData.lastUpdated).toLocaleDateString()}
-                      </div>
-                    )}
-
-                    <div className="flex gap-2 pt-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="flex-1 flex items-center gap-2"
-                        onClick={() => handleProtectedAction('rules', state)}
-                        disabled={state === 'Alabama'}
-                      >
-                        <FileText className="h-3 w-3" />
-                        Manage Rules
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="flex-1 flex items-center gap-2"
-                        onClick={() => handleProtectedAction('configure', state)}
-                        disabled={state === 'Alabama'}
-                      >
-                        <Settings className="h-3 w-3" />
-                        Configure
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-
-          {filteredStates.length === 0 && (
-            <Card className="text-center py-12">
-              <CardContent>
-                <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No states found</h3>
-                <p className="text-muted-foreground">Try adjusting your search terms</p>
-              </CardContent>
-            </Card>
-          )}
+                    </TabsContent>
+                  );
+                })}
+              </Tabs>
+            </div>
+          </main>
         </div>
-
-        <PinProtection
-          isOpen={showPinDialog}
-          onClose={handlePinClose}
-          onSuccess={handlePinSuccess}
-          title="Admin Access Required"
-        />
-      </div>
+      </SidebarProvider>
     </ThemeProvider>
   );
 };
