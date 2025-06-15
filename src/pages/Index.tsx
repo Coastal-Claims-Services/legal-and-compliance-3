@@ -3,33 +3,35 @@ import SimpleChatbot from '../components/SimpleChatbot';
 import { ThemeProvider } from '../components/theme-provider';
 import { ThemeToggle } from '../components/theme-toggle';
 import { Button } from '@/components/ui/button';
-import { Settings } from 'lucide-react';
+import { Settings, BookOpen, Search, BarChart3 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { AppSidebar } from '../components/AppSidebar';
 
 const Index = () => {
   return (
     <ThemeProvider defaultTheme="light" storageKey="ui-theme">
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto py-8">
-          <div className="flex justify-between items-center mb-8">
-            <div className="text-center flex-1">
-              <h1 className="text-4xl font-bold mb-4">Public Adjuster Portal</h1>
-              <p className="text-xl text-muted-foreground">AI-Powered Assistant</p>
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-background">
+          <AppSidebar />
+          <main className="flex-1">
+            <div className="container mx-auto py-8">
+              <div className="flex justify-between items-center mb-8">
+                <div className="flex items-center gap-4">
+                  <SidebarTrigger />
+                  <div className="text-center flex-1">
+                    <h1 className="text-4xl font-bold mb-4">Legal Compliance Hub</h1>
+                    <p className="text-xl text-muted-foreground">AI-Powered State Resource Management</p>
+                  </div>
+                </div>
+                <ThemeToggle />
+              </div>
+              
+              <SimpleChatbot />
             </div>
-            <div className="flex items-center gap-2">
-              <Link to="/admin">
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  Admin
-                </Button>
-              </Link>
-              <ThemeToggle />
-            </div>
-          </div>
-          
-          <SimpleChatbot />
+          </main>
         </div>
-      </div>
+      </SidebarProvider>
     </ThemeProvider>
   );
 };

@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import States from "./pages/States";
+import Search from "./pages/Search";
+import Compare from "./pages/Compare";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +21,8 @@ const App = () => (
           <Route path="/admin" element={<Navigate to="/states" replace />} />
           <Route path="/admin/details" element={<Admin />} />
           <Route path="/states" element={<States />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/compare" element={<Compare />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
