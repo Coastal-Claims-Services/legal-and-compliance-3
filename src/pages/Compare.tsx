@@ -16,6 +16,7 @@ import { texasRules } from '../data/texasRules';
 import { hawaiiRules } from '../data/hawaiiRules';
 import { georgiaRules } from '../data/georgiaRules';
 import { alabamaRules } from '../data/alabamaRules';
+import { delawareRules } from '../data/delawareRules';
 
 const STATE_RULES = {
   'Kentucky': KENTUCKY_RULES,
@@ -24,9 +25,10 @@ const STATE_RULES = {
   'Hawaii': hawaiiRules,
   'Georgia': georgiaRules,
   'Alabama': alabamaRules,
+  'Delaware': delawareRules,
 };
 
-const STATES = ['Kentucky', 'Florida', 'Texas', 'Hawaii', 'Georgia', 'Alabama'];
+const STATES = ['Kentucky', 'Florida', 'Texas', 'Hawaii', 'Georgia', 'Alabama', 'Delaware'];
 
 const Compare = () => {
   const [selectedState1, setSelectedState1] = useState<string>('');

@@ -18,6 +18,7 @@ import { texasRules } from '../data/texasRules';
 import { hawaiiRules } from '../data/hawaiiRules';
 import { georgiaRules } from '../data/georgiaRules';
 import { alabamaRules } from '../data/alabamaRules';
+import { delawareRules } from '../data/delawareRules';
 
 // Combine all rules with state information
 const ALL_RULES = [
@@ -27,6 +28,7 @@ const ALL_RULES = [
   ...hawaiiRules.map(rule => ({ ...rule, state: 'Hawaii' })),
   ...georgiaRules.map(rule => ({ ...rule, state: 'Georgia' })),
   ...alabamaRules.map(rule => ({ ...rule, state: 'Alabama' })),
+  ...delawareRules.map(rule => ({ ...rule, state: 'Delaware' })),
 ];
 
 const CATEGORIES = [
@@ -40,7 +42,7 @@ const CATEGORIES = [
   'Disciplinary Actions'
 ];
 
-const STATES = ['All States', 'Kentucky', 'Florida', 'Texas', 'Hawaii', 'Georgia', 'Alabama'];
+const STATES = ['All States', 'Kentucky', 'Florida', 'Texas', 'Hawaii', 'Georgia', 'Alabama', 'Delaware'];
 
 const Search = () => {
   const [searchTerm, setSearchTerm] = useState('');
