@@ -9,6 +9,7 @@ import States from "./pages/States";
 import Search from "./pages/Search";
 import Compare from "./pages/Compare";
 import Auth from "./pages/Auth";
+import Reports from "./pages/Reports";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={<Navigate to="/states" replace />} />
           <Route path="/admin/details" element={<Admin />} />
+          <Route path="/admin/reports" element={<Reports />} />
           <Route path="/states" element={<States />} />
           <Route path="/search" element={<Search />} />
           <Route path="/compare" element={<Compare />} />
