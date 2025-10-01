@@ -11,7 +11,7 @@ Please add the unified **Compliance & Legal Hub** to the CCS Employee Portal und
 
 ### Consolidated System
 This consolidates 3 separate repositories into one unified system:
-- ✅ ftdcad/legal-and-compliance-3
+- ✅ ftdcad/compliance-and-legal-hub
 - ✅ ftdcad/compliance-legal-2 (archived)
 - ✅ ftdcad/ai-state-compliance (archived)
 
@@ -73,7 +73,7 @@ This consolidates 3 separate repositories into one unified system:
 
 ### Step 1: Copy Files to Employee Portal
 
-Copy these files from `legal-and-compliance-3` to `coastalclaims-employee-portal`:
+Copy these files from `compliance-and-legal-hub` to `coastalclaims-employee-portal`:
 
 **Frontend:**
 ```
@@ -131,7 +131,7 @@ If you want a separate database:
 
 ---
 
-## Files Changed in legal-and-compliance-3 Repo
+## Files Changed in compliance-and-legal-hub Repo
 
 - **30 files changed**, 11,603 insertions(+), 2,704 deletions(-)
 - **New:** `src/pages/ComplianceLegalHub.tsx` (~1350 lines)
@@ -182,7 +182,7 @@ After integration, please verify:
 ## Repository Links
 
 **Main Repo (Active):**
-- https://github.com/Coastal-Claims-Services/legal-and-compliance-3
+- https://github.com/Coastal-Claims-Services/compliance-and-legal-hub
 
 **Archived Repos (Old - DO NOT USE):**
 - https://github.com/Coastal-Claims-Services/compliance-legal-2
