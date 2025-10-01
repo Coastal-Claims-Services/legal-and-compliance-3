@@ -10,6 +10,7 @@ import Search from "./pages/Search";
 import Compare from "./pages/Compare";
 import Auth from "./pages/Auth";
 import Reports from "./pages/Reports";
+import ComplianceLegalHub from "./pages/ComplianceLegalHub";
 
 const queryClient = new QueryClient();
 
@@ -19,9 +20,9 @@ const App = () => (
       <Toaster />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<ComplianceLegalHub />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/admin" element={<Navigate to="/states" replace />} />
+          <Route path="/admin" element={<Navigate to="/" replace />} />
           <Route path="/admin/details" element={<Admin />} />
           <Route path="/admin/reports" element={<Reports />} />
           <Route path="/states" element={<States />} />
